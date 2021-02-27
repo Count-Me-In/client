@@ -1,0 +1,49 @@
+.container {
+    display: flex;
+    padding: 2vw;
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.formLayout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-style: solid;
+    border-radius: 3em;
+    border-color: #ffac33;
+    width: 30vw;
+    height: 50vh;
+    margin-right: 2vw;
+}
+
+.loginBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.loginInput {
+    width: 20vw;
+    margin-bottom: 1vh!important;
+}
+
+.loginBtn {
+    width: 15vw;
+    margin-top: 1vh !important;
+    margin-bottom: 2vh!important;
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.searchInput {
+    width: 20vw;
+    margin-bottom: 1vh!important;
+}

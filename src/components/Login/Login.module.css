@@ -1,0 +1,44 @@
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.formLayout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-style: solid;
+    border-radius: 3em;
+    border-color: #ffac33;
+    margin-top: 20vh;
+    width: 30vw;
+    height: 60vh;
+}
+
+.loginBox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.loginInput {
+    width: 20vw;
+    margin-bottom: 1vh!important;
+    text-align:right
+}
+
+
+.loginBtn {
+    width: 15vw;
+    margin-top: 1vh !important;
+    margin-bottom: 2vh!important;
+}
+
+.checkboxFaculty {
+    direction: ltr;
+    margin-right: 120px!important;
+ }

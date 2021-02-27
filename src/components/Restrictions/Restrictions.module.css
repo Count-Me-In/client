@@ -1,0 +1,12 @@
+.empBox {
+    margin: 10px auto 0 auto;
+    width: 20vw;
+    padding: 10px 10px 10px 10px;
+    border: solid 2px;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    text-align: center!important;
+}

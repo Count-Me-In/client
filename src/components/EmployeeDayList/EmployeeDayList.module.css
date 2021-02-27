@@ -1,0 +1,10 @@
+.employee {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.checkbox {
+    /* direction: ltr; */
+    text-align: center!important;
+}

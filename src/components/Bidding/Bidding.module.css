@@ -1,0 +1,23 @@
+.innerMessage {
+    margin: 0 auto;
+}
+.alert {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-content: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+
+.percent {
+    width: 5vw!important;
+    /* height: 2vh!important; */
+    font-size: 5px!important;
+}
+
+.button {
+    min-width: 0.5vw !important;
+}

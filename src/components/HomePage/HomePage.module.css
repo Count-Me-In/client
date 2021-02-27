@@ -1,0 +1,8 @@
+.customActions {
+    display: flex;
+    flex-direction: row;
+    position: absolute!important;
+    right: 15px;
+    margin-top: 5px;
+    z-index: 1;
+}
