@@ -103,7 +103,7 @@ function HomePage({ loggedUser }) {
             <Paper dir={'ltr'}>
                 <Scheduler
                     data={appointments}
-                    height={650}
+                    // height={650}
                 >
                     <ViewState
                         currentDate={currentDate}

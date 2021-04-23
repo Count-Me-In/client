@@ -21,6 +21,8 @@ import Typography from '@material-ui/core/Typography';
 import PlanArrival from './components/PlanArrival/PlanArrival';
 import ManageEmployeePoints from './components/ManageEmployeePoints/ManageEmployeePoints';
 import Restrictions from './components/Restrictions/Restrictions';
+import Axios from 'axios';
+import { API_URL, TOKEN } from './Config/config';
 
 const theme = createMuiTheme({
   typography: {
@@ -44,10 +46,11 @@ const theme = createMuiTheme({
 
 
 function App() {
-  const [loggedUser, setUser] = useState({name: 'Itay', isManager: true});
+  const [loggedUser, setUser] = useState({});
   const [tab, setTab] = useState();
   const [openMenu, setOpen] = React.useState(false);
-  const [currP, setCurrP] = useState();//TODO: ask from server
+  const [currPoints, setCurrPoints] = useState(undefined);//TODO: ask from server
+  const [currPercents, setCurrPercents] = useState();//TODO: ask from server
   const [anchorEl, setAnchorEl] = React.useState(null);
   const isLoggedIn = Object.keys(loggedUser).length != 0;
   const anchorRef = React.useRef(null);
@@ -117,7 +120,7 @@ function App() {
                 >
                   <Typography className={classes.typography}>
                     Welcome to Count Me In The Office!
-    באתר זה תוכלו להרשם להרצאות המתקיימות הסמסטר בצורה היברידית והמערכת תחשב ותבחר מי יורשה להכנס לשיעור הפרונטלי בצורה הוגנת. הינך מקבל סך נקודות שבועיות אשר מצטברות משבוע לשבוע. עלייך לחלק את הנקודות שברשותך בין הקורסים הנמצאים במערכת השעות שלך. החלוקה תעשה בעזרת חלוקת אחוזים. ברשותך 100% אותם תוכל לחלק בין הקורסים השונים. שים לב כי החלוקה נתונה לשיקול דעתך, אינך חייב לחלק את כל האחוזים ואינך חייב לחלק אחוזים לכל קורס. לאחר מכן המערכת תשקלל את בחירות כל התלמידים ותבחר מי ייכנס לכל שיעור. את חלוקת האחוזים תוכל לשנות באופן דינאמי בלשונית biding.
+                    באתר זה תוכלו להרשם להרצאות המתקיימות הסמסטר בצורה היברידית והמערכת תחשב ותבחר מי יורשה להכנס לשיעור הפרונטלי בצורה הוגנת. הינך מקבל סך נקודות שבועיות אשר מצטברות משבוע לשבוע. עלייך לחלק את הנקודות שברשותך בין הקורסים הנמצאים במערכת השעות שלך. החלוקה תעשה בעזרת חלוקת אחוזים. ברשותך 100% אותם תוכל לחלק בין הקורסים השונים. שים לב כי החלוקה נתונה לשיקול דעתך, אינך חייב לחלק את כל האחוזים ואינך חייב לחלק אחוזים לכל קורס. לאחר מכן המערכת תשקלל את בחירות כל התלמידים ותבחר מי ייכנס לכל שיעור. את חלוקת האחוזים תוכל לשנות באופן דינאמי בלשונית biding.
     את מערכת השעות והשיבוצים לשבועיים הקרובים תוכל לראות בלשונית schedule כאשר השיעורים אליהם הצלחת להיכנס יסומנו בירוק, ואלה שלא יסומנו באפור. שים לב שכל חלוקת אחוזים רלוונטית לשבוע השלישי.</Typography>
                 </Popover>
               </div>
@@ -125,8 +128,8 @@ function App() {
             {isLoggedIn &&
               <div className={classes.navbarChild}>
                 <div className={classes.biddindData}>
-                  <label><strong>points: 1500</strong></label>
-                  {currP ? <label><strong>Percents: {currP}%</strong></label> : null }
+                  {currPoints !== undefined ? <label><strong>points: {currPoints}</strong></label> : null}
+                  {currPercents ? <label><strong>Percents: {currPercents}%</strong></label> : null}
                 </div>
                 <div className={classes.tabs}>
                   <Link to="/Home" onClick={() => setTab(1)} className={!isLoggedIn || tab != 1 ? classes.link : classes.clickedLink}>
@@ -177,78 +180,86 @@ function App() {
                         )}
                       </Popper>
                     </div>
-                    }
+                  }
                 </div>
-                    <Link onClick={() => { setUser({}) }} to="/" className={classes.logout}>
-                      <h3>log out</h3>
-                    </Link>
+                <Link onClick={() => { setUser({}) }} to="/" className={classes.logout}>
+                  <h3>log out</h3>
+                </Link>
               </div>
-                }
+            }
           </Toolbar>
         </AppBar >
-              <Switch>
-                <PrivateRoute loggedUser={loggedUser} path="/home">
-                  <HomePage loggedUser={loggedUser} />
-                </PrivateRoute>
-                <PrivateRoute loggedUser={loggedUser} path="/bidding">
-                  <Bidding updatePercents={(p) => { setCurrP(p) }} />
-                </PrivateRoute>
-                <Route path="/login">
-                  <Login onLogin={(user) => {
-                    setTab(1)
-                    setUser(user)
-                  }} />
-                </Route>
-                
-                <PrivateRoute loggedUser={loggedUser} isManager={true} path="/employeesPoints">
-                  <ManageEmployeePoints />
-                </PrivateRoute>
-                
-                <PrivateRoute loggedUser={loggedUser} isManager={true} path="/restriction">
-                  <Restrictions />
-                </PrivateRoute>
-                
-                <PrivateRoute loggedUser={loggedUser} isManager={true} path="/arrival">
-                  <PlanArrival />
-                </PrivateRoute>
-                <Route path="/">
-                  <Redirect
-                    to={{
-                      pathname: "/login",
-                    }}
-                  />
-                  <Login />
-                </Route>
-              </Switch>
+        <Switch>
+          <PrivateRoute loggedUser={loggedUser} path="/home">
+            <HomePage loggedUser={loggedUser} />
+          </PrivateRoute>
+          <PrivateRoute loggedUser={loggedUser} path="/bidding">
+            <Bidding updatePercents={(p) => { setCurrPercents(p) }} />
+          </PrivateRoute>
+          <Route path="/login">
+            <Login onLogin={(user) => {
+              setTab(1)
+              setUser(user)
+              const token = TOKEN();
+              Axios.get(`${API_URL}/employees/employeePoints`, {
+                headers: {
+                  'Authorization': `Bearer ${TOKEN()}`,
+                }
+              }).then(({ data }) => {
+                setCurrPoints(data)
+              })
+            }} />
+          </Route>
+
+          <PrivateRoute loggedUser={loggedUser} isManager={true} path="/employeesPoints">
+            <ManageEmployeePoints />
+          </PrivateRoute>
+
+          <PrivateRoute loggedUser={loggedUser} isManager={true} path="/restriction">
+            <Restrictions />
+          </PrivateRoute>
+
+          <PrivateRoute loggedUser={loggedUser} isManager={true} path="/arrival">
+            <PlanArrival />
+          </PrivateRoute>
+          <Route path="/">
+            <Redirect
+              to={{
+                pathname: "/login",
+              }}
+            />
+            <Login />
+          </Route>
+        </Switch>
       </Router>
     </ThemeProvider >
-          );
-        }
-        
-function PrivateRoute({children, loggedUser, isManager}) {
+  );
+}
+
+function PrivateRoute({ children, loggedUser, isManager }) {
   return (
     <Route
-            render={({ location }) =>
-              Object.keys(loggedUser).length === 0 ? 
-              (
-                <Redirect
-                  to={{
-                    pathname: "/login",
-                    state: { from: location }
-                  }}
-                />
-              ) : loggedUser.isManager || !isManager ?
-              ( children ) :
-              (
-                <Redirect
-                  to={{
-                    pathname: "/home",
-                  }}
-                />
-              )
-            }
-          />
-          );
-        }
-        
-        export default App;
+      render={({ location }) =>
+        Object.keys(loggedUser).length === 0 ?
+          (
+            <Redirect
+              to={{
+                pathname: "/login",
+                state: { from: location }
+              }}
+            />
+          ) : loggedUser.isManager || !isManager ?
+            (children) :
+            (
+              <Redirect
+                to={{
+                  pathname: "/home",
+                }}
+              />
+            )
+      }
+    />
+  );
+}
+
+export default App;

@@ -17,7 +17,10 @@ function Bidding({ updatePercents }) {
     const getNextSunday = () => {
         var d = new Date();
         const diff = d.getDay();
-        return new Date(d.setDate(d.getDate() - diff + 7));
+        const sunday = new Date(d.setDate(d.getDate() - diff + 7));
+        sunday.setHours(9);
+        sunday.setMinutes(0);
+        return sunday;
     }
 
     let sunday = getNextSunday();
@@ -27,12 +30,18 @@ function Bidding({ updatePercents }) {
     let wednesday = new Date(tempDate.setDate(tempDate.getDate() + 1))
     let thursday = new Date(tempDate.setDate(tempDate.getDate() + 1))
 
+    const getEndDate = (date) => {
+        const endDate = new Date(date)
+        endDate.setHours(18)
+        return endDate;
+    }
+
     const schedulerData = [
-        { id: 1, startDate: sunday, endDate: sunday, percents: 30 },
-        { id: 2, startDate: monday, endDate: monday, percents: 40 },
-        { id: 3, startDate: tuesday, endDate: tuesday, percents: 20 },
-        { id: 4, startDate: wednesday, endDate: wednesday, percents: 5 },
-        { id: 5, startDate: thursday, endDate: thursday, percents: 5 },
+        { id: 1, startDate: sunday.toISOString(), endDate: getEndDate(sunday).toISOString(), percents: 30 },
+        { id: 2, startDate: monday.toISOString(), endDate: getEndDate(monday).toISOString(), percents: 40 },
+        { id: 3, startDate: tuesday.toISOString(), endDate: getEndDate(tuesday).toISOString(), percents: 20 },
+        { id: 4, startDate: wednesday.toISOString(), endDate: getEndDate(wednesday).toISOString(), percents: 5 },
+        { id: 5, startDate: thursday.toISOString(), endDate: getEndDate(thursday).toISOString(), percents: 5 },
     ];
 
     const [appointments, setAppointments] = useState(schedulerData);
@@ -112,14 +121,14 @@ function Bidding({ updatePercents }) {
                 }
                 <Scheduler
                     data={appointments}
-                    height={650}
+                    // height={650}
                 >
                     <ViewState
                         defaultCurrentDate={sunday}
                     />
                     <WeekView
-                        startDayHour={9}
-                        endDayHour={21}
+                        startDayHour={8}
+                        endDayHour={19}
 
                         excludedDays={[7, 6]}
                         timeTableCellComponent={TimeTableCell}

@@ -53,7 +53,9 @@ function Restrictions() {
 
     const updateUserRestrictions = (restrictions) => {
         const newEmpRestriction = empRestrictions.map((emp) => emp.name !== employee.name ? emp : { name: emp.name, restrictions });
+        const updatedEmployee = newEmpRestriction.find((emp) => emp.name === employee.name)
         updateRestrictions(newEmpRestriction);
+        selectEmployee(updatedEmployee);
     }
 
     const handleChange = (event) => {
