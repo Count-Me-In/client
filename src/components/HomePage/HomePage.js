@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import classes from './HomePage.module.css';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
@@ -16,15 +16,18 @@ import {
 import { teal, grey } from '@material-ui/core/colors';
 import { Button } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
+import Axios from 'axios';
+import { API_URL, TOKEN } from '../../Config/config';
+
 
 const schedulerData = [
-    { startDate: '2020-12-24T09:45', endDate: '2020-12-24T10:45', isIn: 0 },
-    { startDate: '2020-12-25T09:45', endDate: '2020-12-25T10:45', isIn: 1 },
-    { startDate: '2021-01-01T09:45', endDate: '2021-01-01T10:45', isIn: 1 },
-    { startDate: '2020-12-01T09:45', endDate: '2020-12-01T10:45', isIn: 1 },
-    { startDate: '2020-12-03T09:45', endDate: '2020-12-03T10:45', isIn: 0 },
-    { startDate: '2020-12-16T09:45', endDate: '2020-12-16T10:45', isIn: 0 },
-    { startDate: '2020-12-07T09:45', endDate: '2020-12-07T10:45', isIn: 1 },
+    { startDate: '2021-04-25T09:00', endDate: '2021-04-25T09:15', isIn: 0 },
+    { startDate: '2021-04-26T09:45', endDate: '2021-04-26T09:45', isIn: 1 },
+    { startDate: '2021-04-27T09:45', endDate: '2021-04-27T09:45', isIn: 1 },
+    { startDate: '2021-04-28T09:45', endDate: '2021-04-28T09:45', isIn: 1 },
+    { startDate: '2021-04-29T09:45', endDate: '2021-04-29T09:45', isIn: 0 },
+    { startDate: '2021-04-30T09:45', endDate: '2021-04-30T09:45', isIn: 0 },
+    { startDate: '2021-05-01T09:45', endDate: '2021-05-01T09:45', isIn: 1 },
 ];
 
 const employeesSechudel = [
@@ -59,12 +62,36 @@ const allocations = [
 
 function HomePage({ loggedUser }) {
     const [currentDate, setDate] = useState(Date.now);
-    const [appointments, setData] = useState(schedulerData);
+    const [appointments, setAppointments] = useState([]);
     const resources = [{
         fieldName: 'isIn',
         title: 'כניסה לשיעור',
         instances: allocations,
     }]
+
+
+    const datesToAppointments = (dateLst) => {
+        var appLst = Array()
+        for(var i = 0; i < dateLst.length; i++){
+            let startDate = (dateLst[i] || '').split(':')
+            startDate[1] = "15"
+            appLst.push({startDate: dateLst[i], endDate: startDate.join(':'), isIn: 1})
+        }
+        console.log(appLst)
+        return appLst
+    }
+
+
+    //triggered on page upload
+    useEffect(() => {
+        Axios.get(`${API_URL}/employees/getEmployeeAssigning`, {headers: {
+            'Authorization': `Bearer ${TOKEN()}`,
+        }}).then(({data}) => {
+            var app = datesToAppointments(data._assignedDays)
+            setAppointments(app)
+        }).catch((err)=> console.log(err))
+    }, []);
+
 
     const Appointment = ({ children }) => {
         return <div dir={'rtl'}>
@@ -83,7 +110,7 @@ function HomePage({ loggedUser }) {
         <div>
             {loggedUser.isManager &&
                 <div className={classes.customActions}>
-                    <Button onClick={()=> setData(schedulerData)}>My Schedule</Button>
+                    <Button onClick={()=> setAppointments(schedulerData)}>My Schedule</Button>
                     <Autocomplete
                         id="employees"
                         size='small'
@@ -93,7 +120,7 @@ function HomePage({ loggedUser }) {
                         renderInput={(params) => <TextField {...params} label="Emplyee name" variant="outlined" />}
                         onChange={(event, value) => {
                             if (value) {
-                                setData(employeesSechudel.filter(emp => emp.name === value)[0].schedule)
+                                setAppointments(employeesSechudel.filter(emp => emp.name === value)[0].schedule)
                             }
                         }}
                     />
