@@ -1,40 +1,52 @@
-import React, { useState, Text} from 'react';
+import React, { useState, useEffect} from 'react';
 import classes from './ManageEmployeePoints.module.css'
 import { TextField} from '@material-ui/core';
 import EmployeePoints from './EmployeePoints/EmployeePoints';
+import Axios from 'axios';
+import { API_URL, TOKEN } from '../../Config/config';
 
 function ManageEmployeePoints() {
-    const [totalPoints, setTotalPoints] = useState(250);
-    const [employees, updateEmpPoints] = useState([
-        {
-            id:1,
-            name: "Shenhav",
-            points: 40
-        },
-        {
-            id:2,
-            name: "Noy",
-            points: 50
-        },
-        {
-            id:3,
-            name: "Nufar",
-            points: 100
-        },
-        {
-            id:4,
-            name: "Shauli",
-            points: 10
-        }
-    ])
+    const [totalPoints, setTotalPoints] = useState(0);
+    const [employees, updateEmpPoints] = useState([])
+
+    useEffect(() => {
+        Axios.get(`${API_URL}/managers/getEmployeesPoints`, {headers: {
+            'Authorization': `Bearer ${TOKEN()}`,
+          }}).then(({data}) => {
+                var id = 1;
+                var result = Array()
+                var sum = 0
+                for (const [key, value] of Object.entries(data)) {
+                    result.push({id: id, name: key, points: value})
+                    id++
+                    sum += value
+                }  
+                updateEmpPoints(result)
+                setTotalPoints(sum)
+        }).catch((err)=> console.log(err))
+    }, []);
+
+
 
     function handlePointsChange(empName, points) {
         const updatedEmp = employees.map((emp) => emp.name === empName ? {...emp, points:points} : emp)
         const sum = updatedEmp.reduce((lastPoints, emp) => +emp.points + +lastPoints, 0)
         
-        if (sum > totalPoints)
+        if (sum > totalPoints){
             return false;
+        }
 
+        console.log(typeof(points))
+
+        Axios.post(`${API_URL}/managers/setEmployeePoints`, { //TODO: not working. check why request failed with code 401
+            headers: {
+                'Authorization': `Bearer ${TOKEN()}`,
+            },
+            params: {
+                'employeename': empName, 
+                'points': points,
+            }
+        })
         updateEmpPoints(updatedEmp);
         return true;
     }

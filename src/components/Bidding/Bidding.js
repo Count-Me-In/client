@@ -16,7 +16,7 @@ import { API_URL, TOKEN } from '../../Config/config';
 
 function Bidding({ updatePercents }) {
 
-    //triggered on page upload
+    //triggered onpage load
     useEffect(() => {
         Axios.get(`${API_URL}/employees/bids_collection`, {headers: {
             'Authorization': `Bearer ${TOKEN()}`,
@@ -61,6 +61,7 @@ function Bidding({ updatePercents }) {
     ]
 
     const [appointments, setAppointments] = useState(schedulerData);
+    const [originalBidsObj, setoriginalBidsObj] = useState([]);
     const [showAlert, setAlert] = useState(false);
 
     //update appointments on first upload and on every change
@@ -70,6 +71,7 @@ function Bidding({ updatePercents }) {
             return appointment;
         })
         setAppointments(newAppontments)
+        setoriginalBidsObj(data)
 
         let sum = 0;//TODO: need this?
         appointments.forEach((appointment) => {
@@ -84,11 +86,22 @@ function Bidding({ updatePercents }) {
 
 
     const updateAppointmentsOnServer = (newAppointments) => {
-        //TODO: Hi nufi:) stam, complete server requesttt
-        Axios.put(`${API_URL}/employees/updateBids`, {
-        
-            newAppointments
-        })
+
+        //first - update original bids object
+        var new_origin = originalBidsObj
+        for(var i = 0; i < newAppointments.length; i++){
+            new_origin[i]['_percentage'] = newAppointments[i]['percents']
+        }
+        setoriginalBidsObj(new_origin)
+        console.log(originalBidsObj)
+        Axios.put(`${API_URL}/employees/updateBids`, {//TODO: not working. check why request failed with code 401
+            headers: {
+                'Authorization': `Bearer ${TOKEN()}`,
+            },
+            params: {
+                'bids': originalBidsObj, 
+            }
+        }).catch((err) => {console.log(err)})
     }
 
     const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
