@@ -94,7 +94,7 @@ function Bidding({ updatePercents }) {
         }
         setoriginalBidsObj(new_origin)
         console.log(originalBidsObj)
-        Axios.put(`${API_URL}/employees/updateBids`, {//TODO: not working. check why request failed with code 401
+        Axios.put(`${API_URL}/employees/updateBids`,{}, {//TODO: not working. check why request failed with code 401
             headers: {
                 'Authorization': `Bearer ${TOKEN()}`,
             },
