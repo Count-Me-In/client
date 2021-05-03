@@ -26,7 +26,7 @@ const allocations = [
     { text: 'Maybe next time', id: 0, color: grey },
 ];
 
-function HomePage({ loggedUser }) {
+function HomePage() {
     const [currentDate, setDate] = useState(Date.now);
     const [userScheduler, setUserScheduler] = useState([]);
     const [scheduler, setScheduler] = useState([]);
@@ -42,10 +42,10 @@ function HomePage({ loggedUser }) {
 
     const datesToScheduler = (dateLst) => {
         var sched = Array()
-        for(var i = 0; i < dateLst.length; i++){
+        for (var i = 0; i < dateLst.length; i++) {
             let startDate = (dateLst[i] || '').split(':')
             startDate[1] = "15"
-            sched.push({startDate: dateLst[i], endDate: startDate.join(':'), isIn: 1})
+            sched.push({ startDate: dateLst[i], endDate: startDate.join(':'), isIn: 1 })
         }
         console.log(sched)
         return sched
@@ -54,35 +54,28 @@ function HomePage({ loggedUser }) {
 
     //triggered on page upload
     useEffect(() => {
-        Axios.get(`${API_URL}/employees/getEmployeeAssigning`, {headers: {
-            'Authorization': `Bearer ${TOKEN()}`,
-        }}).then(({data}) => {
+        Axios.get(`${API_URL}/employees/getEmployeeAssigning`).then(({ data }) => {
             var app = datesToScheduler(data._assignedDays)
             setUserScheduler(app)
             setScheduler(app)
-        }).catch((err)=> console.log(err))
+        }).catch((err) => console.log(err))
 
-        if(loggedUser.isManager){
-            Axios.get(`${API_URL}/managers/getEmployees`, {headers: {
-                'Authorization': `Bearer ${TOKEN()}`,
-            }}).then(({data}) => {
+        if (localStorage.getItem('isManager')) {
+            Axios.get(`${API_URL}/managers/getEmployees`).then(({ data }) => {
                 setEmployees(data)
-            }).catch((err)=> console.log(err))
+            }).catch((err) => console.log(err))
         }
     }, []);
 
     const getEmployeeScheduler = (employeeName) => {
         Axios.get(`${API_URL}/managers/getEmployeeAssigning`, {
-            headers: {
-                'Authorization': `Bearer ${TOKEN()}`,
-            },
             params: {
                 'employeename': employeeName
             }
-        }).then(({data}) => {
-            var dts = datesToScheduler(data._assignedDays) 
+        }).then(({ data }) => {
+            var dts = datesToScheduler(data._assignedDays)
             setScheduler(dts)
-        }).catch((err)=> {
+        }).catch((err) => {
             console.log(err)
             setScheduler([])
         })
@@ -102,9 +95,9 @@ function HomePage({ loggedUser }) {
 
     return (
         <div>
-            {loggedUser.isManager &&
+            {localStorage.getItem('isManager') &&
                 <div className={classes.customActions}>
-                    <Button onClick={()=> setScheduler(userScheduler)}>My Schedule</Button>
+                    <Button onClick={() => setScheduler(userScheduler)}>My Schedule</Button>
                     <Autocomplete
                         id="employees"
                         size='small'
@@ -126,7 +119,7 @@ function HomePage({ loggedUser }) {
             <Paper dir={'ltr'}>
                 <Scheduler
                     data={scheduler}
-                    // height={650}
+                // height={650}
                 >
                     <ViewState
                         currentDate={currentDate}

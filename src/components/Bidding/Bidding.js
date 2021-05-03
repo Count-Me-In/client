@@ -18,14 +18,12 @@ function Bidding({ updatePercents }) {
 
     //triggered onpage load
     useEffect(() => {
-        Axios.get(`${API_URL}/employees/bids_collection`, {headers: {
-            'Authorization': `Bearer ${TOKEN()}`,
-          }}).then(({data}) => {
+        Axios.get(`${API_URL}/employees/bids_collection`).then(({ data }) => {
             console.log(data)
-            if(data.length === 5){
+            if (data.length === 5) {
                 updateAppointments(data)
             }
-        }).catch((err)=> console.log(err))
+        }).catch((err) => console.log(err))
     }, []);
 
 
@@ -44,7 +42,7 @@ function Bidding({ updatePercents }) {
     let tuesday = new Date(tempDate.setDate(tempDate.getDate() + 1))
     let wednesday = new Date(tempDate.setDate(tempDate.getDate() + 1))
     let thursday = new Date(tempDate.setDate(tempDate.getDate() + 1))
-    
+
     //initialize appointments
     const getEndDate = (date) => {
         const endDate = new Date(date)
@@ -67,7 +65,7 @@ function Bidding({ updatePercents }) {
     //update appointments on first upload and on every change
     const updateAppointments = (data) => {
         const newAppontments = appointments.map((appointment) => {
-            appointment.percents = data[appointment.id - 1]._percentage;                
+            appointment.percents = data[appointment.id - 1]._percentage;
             return appointment;
         })
         setAppointments(newAppontments)
@@ -82,26 +80,23 @@ function Bidding({ updatePercents }) {
 
 
 
-    
+
 
 
     const updateAppointmentsOnServer = (newAppointments) => {
 
         //first - update original bids object
         var new_origin = originalBidsObj
-        for(var i = 0; i < newAppointments.length; i++){
+        for (var i = 0; i < newAppointments.length; i++) {
             new_origin[i]['_percentage'] = newAppointments[i]['percents']
         }
         setoriginalBidsObj(new_origin)
         console.log(originalBidsObj)
-        Axios.put(`${API_URL}/employees/updateBids`,{}, {//TODO: not working. check why request failed with code 401
-            headers: {
-                'Authorization': `Bearer ${TOKEN()}`,
-            },
+        Axios.put(`${API_URL}/employees/updateBids`, {}, {
             params: {
-                'bids': originalBidsObj, 
+                'bids': originalBidsObj,
             }
-        }).catch((err) => {console.log(err)})
+        }).catch((err) => { console.log(err) })
     }
 
     const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
@@ -179,7 +174,7 @@ function Bidding({ updatePercents }) {
                 }
                 <Scheduler
                     data={appointments}
-                    // height={650}
+                // height={650}
                 >
                     <ViewState
                         defaultCurrentDate={sunday}
