@@ -23,6 +23,7 @@ import ManageEmployeePoints from './components/ManageEmployeePoints/ManageEmploy
 import Restrictions from './components/Restrictions/Restrictions';
 import Axios from 'axios';
 import { API_URL, TOKEN } from './Config/config';
+import 'antd/dist/antd.css';
 
 const theme = createMuiTheme({
   typography: {
@@ -171,11 +172,11 @@ function App() {
                                       Days restriction
                                     </Link>
                                   </MenuItem>
-                                  <MenuItem onClick={handleMenuSelection}>
+                                  {/* <MenuItem onClick={handleMenuSelection}>
                                     <Link to="/arrival" onClick={() => setTab(3)}  >
                                       Plan arrival
                                     </Link>
-                                  </MenuItem>
+                                  </MenuItem> */}
                                 </MenuList>
                               </ClickAwayListener>
                             </Paper>
@@ -220,9 +221,9 @@ function App() {
             <Restrictions />
           </PrivateRoute>
 
-          <PrivateRoute isManager={true} path="/arrival">
+          {/* <PrivateRoute isManager={true} path="/arrival">
             <PlanArrival />
-          </PrivateRoute>
+          </PrivateRoute> */}
           <Route path="/">
             <Redirect
               to={{

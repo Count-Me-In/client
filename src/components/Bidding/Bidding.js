@@ -8,34 +8,24 @@ import {
     Appointments,
     Toolbar,
 } from '@devexpress/dx-react-scheduler-material-ui';
-import { TextField, IconButton } from '@material-ui/core';
+import { Select } from 'antd';
+import { TextField, IconButton, FormControl, InputLabel, Input, MenuItem, Checkbox, ListItemText } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import { ViewState } from '@devexpress/dx-react-scheduler';
 import Axios from 'axios';
 import { API_URL, TOKEN } from '../../Config/config';
+const { Option } = Select;
+
+const getNextSunday = () => {
+    var d = new Date();
+    const diff = d.getDay();
+    const sunday = new Date(d.setDate(d.getDate() - diff + 7));
+    sunday.setHours(9);
+    sunday.setMinutes(0);
+    return sunday;
+}
 
 function Bidding({ updatePercents }) {
-
-    //triggered onpage load
-    useEffect(() => {
-        Axios.get(`${API_URL}/employees/bids_collection`).then(({ data }) => {
-            console.log(data)
-            if (data.length === 5) {
-                updateAppointments(data)
-            }
-        }).catch((err) => console.log(err))
-    }, []);
-
-
-    const getNextSunday = () => {
-        var d = new Date();
-        const diff = d.getDay();
-        const sunday = new Date(d.setDate(d.getDate() - diff + 7));
-        sunday.setHours(9);
-        sunday.setMinutes(0);
-        return sunday;
-    }
-
     let sunday = getNextSunday();
     const tempDate = new Date(sunday);
     let monday = new Date(tempDate.setDate(tempDate.getDate() + 1));
@@ -59,8 +49,23 @@ function Bidding({ updatePercents }) {
     ]
 
     const [appointments, setAppointments] = useState(schedulerData);
+    const [employees, setEmployees] = useState([]);
     const [originalBidsObj, setoriginalBidsObj] = useState([]);
     const [showAlert, setAlert] = useState(false);
+
+    //triggered onpage load
+    useEffect(() => {
+        Promise.all([Axios.get(`${API_URL}/employees/all`), Axios.get(`${API_URL}/employees/bids_collection`)]).then(([employees, BidCollection]) => {
+            console.log(BidCollection.data)
+            console.log(employees.data);
+            if (BidCollection.data.length === 5) {
+                updateAppointments(BidCollection.data)
+            }
+            if (employees?.data?.length > 0) {
+                setEmployees(employees?.data)
+            }
+        }).catch((err) => console.log(err))
+    }, []);
 
     //update appointments on first upload and on every change
     const updateAppointments = (data) => {
@@ -78,13 +83,7 @@ function Bidding({ updatePercents }) {
         updatePercents(sum)
     }
 
-
-
-
-
-
     const updateAppointmentsOnServer = (newAppointments) => {
-
         //first - update original bids object
         var new_origin = originalBidsObj
         for (var i = 0; i < newAppointments.length; i++) {
@@ -110,52 +109,87 @@ function Bidding({ updatePercents }) {
         const startDate = new Date(restProps.data.startDate)
         const endDate = new Date(restProps.data.endDate)
         const [percents, setPercents] = useState(restProps.data.percents);
+        const [invites, setInvites] = useState([]);
+
+        const logSelect = (item) => {
+            console.log(item);
+        }
+
+        const handleChangeMultiple = (selectedList) => {
+            // const value = [];
+            // for (let i = 0, l = list.length; i < l; i += 1) {
+            //     if (list[i].selected) {
+            //         value.push(list[i].value);
+            //     }
+            // }
+            setInvites(selectedList);
+        };
 
         return (
-            <Appointments.AppointmentContent dir={'rtl'} {...restProps}>
-                <div className={restProps.container}>
-                    <div>
-                        <strong>{restProps.data.title}</strong>
-                    </div>
+            <Appointments.AppointmentContent  {...restProps}>
+                <div className={classes.container}>
                     <div>
                         {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
                             + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
-                    <TextField
-                        type="number"
-                        size="small"
-                        className={classes.percent}
-                        value={percents}
-                        onChange={(ev) => {
-                            setPercents(parseInt(ev.target.value))
-                        }
-                        } />
-                    <IconButton onClick={() => {
-                        let sum = 0;
-                        appointments.forEach((appointment) => {
-                            if (appointment.id !== restProps.data.id)
-                                sum += appointment.percents;
-                            else
-                                sum += percents;
-                        })
-                        if (sum > 100) {
-                            setAlert(true)
-                            setTimeout(() => {
-                                setAlert(false)
-                            }, 3000);
-                        } else {
-                            const data = appointments.map((appointment) => {
-                                if (appointment.id === restProps.data.id)
-                                    appointment.percents = percents;
-                                return appointment;
+                    <Select
+                        mode="multiple"
+                        allowClear
+                        showSearch
+                        style={{ width: '100%' }}
+                        placeholder="Invite a friend"
+                        onChange={handleChangeMultiple}
+
+                        filterOption={(input, option) => {
+                            return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                        }}
+                    >
+                        {employees.map((emp, i) => (
+                            <Option key={i} value={emp}>{emp}</Option>
+                        ))}
+                    </Select>
+                    <div style={ {display: 'flex', flexDirection:'row', alignItems: 'center'} }>
+                        <TextField
+                            type="number"
+                            size="small"
+                            label="Percents"
+                            className={classes.percent}
+                            value={percents}
+                            onChange={(ev) => {
+                                setPercents(parseInt(ev.target.value))
+                            }
+                            } />
+
+                        <IconButton onClick={() => {
+                            let sum = 0;
+                            appointments.forEach((appointment) => {
+                                if (appointment.id !== restProps.data.id)
+                                    sum += appointment.percents;
+                                else
+                                    sum += percents;
                             })
-                            setAppointments(data);
-                            updatePercents(sum)
-                            updateAppointmentsOnServer(data) //TODO: CHECK THIS
-                        }
-                    }}
-                        aria-label="save" className={classes.margin} size="small">
-                        <SaveIcon fontSize="inherit" />
-                    </IconButton>
+                            if (sum > 100) {
+                                setAlert(true)
+                                setTimeout(() => {
+                                    setAlert(false)
+                                }, 3000);
+                            } else {
+                                // TODO: send request to update percentes and send invites
+                                
+
+                                const data = appointments.map((appointment) => {
+                                    if (appointment.id === restProps.data.id)
+                                        appointment.percents = percents;
+                                    return appointment;
+                                })
+                                setAppointments(data);
+                                updatePercents(sum)
+                                updateAppointmentsOnServer(data) //TODO: CHECK THIS
+                            }
+                        }}
+                            aria-label="save" className={classes.margin} size="small">
+                            <SaveIcon fontSize="inherit" />
+                        </IconButton>
+                    </div>
                 </div>
             </Appointments.AppointmentContent >
         );
