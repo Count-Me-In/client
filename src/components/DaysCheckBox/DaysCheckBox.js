@@ -13,6 +13,7 @@ const mapIndexToDayString = ((index) => {
 
 export default function CheckboxesGroup({ restrictions, updateUserRestrictions }) {
     const handleChange = (event) => {
+        console.log("inside handle change day check box")
         const newRestrictions = [...restrictions];
         newRestrictions[event.target.name] = event.target.checked;
         updateUserRestrictions(newRestrictions);
