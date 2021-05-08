@@ -60,37 +60,30 @@ function Restrictions() {
         console.log(employeeName)
         console.log(allowedDays)
         var allowed = [false, false, false, false, false]
-        for(var i = 0; i < allowedDays.length; i++){
+        for (var i = 0; i < allowedDays.length; i++) {
             var day = allowedDays[i]
-            if(day >= 0 && day < 5){
-                allowed[day] = true 
+            if (day >= 0 && day < 5) {
+                allowed[day] = true
             }
         }
         console.log(allowed)
-        updateRestrictions(empRestrictions.push({name: employeeName, restrictions: allowed}))
-        console.log(empRestrictions)        
-    } 
+
+        updateRestrictions(empRestrictions.push({ name: employeeName, restrictions: allowed }))
+    }
 
     //triggered onpage load
     useEffect(() => {
-        Axios.get(`${API_URL}/managers/getEmployeesRestrictions`, {headers: {
-            'Authorization': `Bearer ${TOKEN()}`,
-          }}).then(({data}) => {
+        Axios.get(`${API_URL}/managers/getEmployeesRestrictions`).then(({ data }) => {
             console.log(data)
-            
+
             for (const [key, value] of Object.entries(data)) {
                 addEmpRestriction(key, value['_allowed_days'])
-            } 
-            console.log(empRestrictions)
-            if(empRestrictions.length > 0){
-                console.log(empRestrictions[0])
-                selectEmployee(empRestrictions[0])
             }
             console.log(empRestrictions)
-            console.log(typeof(empRestrictions))
-            console.log(employee)
-
-        }).catch((err)=> console.log(err))
+            if (empRestrictions.lengh > 0) {
+                selectEmployee(empRestrictions[0])
+            }
+        }).catch((err) => console.log(err))
     }, []);
 
 
