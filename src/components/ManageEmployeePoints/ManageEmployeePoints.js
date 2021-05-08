@@ -38,7 +38,7 @@ function ManageEmployeePoints() {
 
         console.log(typeof(points))
 
-        Axios.post(`${API_URL}/managers/setEmployeePoints`, { //TODO: not working. check why request failed with code 401
+        Axios.post(`${API_URL}/managers/setEmployeePoints`,{}, { //TODO: not working. check why request failed with code 401
             headers: {
                 'Authorization': `Bearer ${TOKEN()}`,
             },
