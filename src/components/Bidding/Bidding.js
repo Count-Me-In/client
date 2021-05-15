@@ -111,17 +111,7 @@ function Bidding({ updatePercents }) {
         const [percents, setPercents] = useState(restProps.data.percents);
         const [invites, setInvites] = useState([]);
 
-        const logSelect = (item) => {
-            console.log(item);
-        }
-
         const handleChangeMultiple = (selectedList) => {
-            // const value = [];
-            // for (let i = 0, l = list.length; i < l; i += 1) {
-            //     if (list[i].selected) {
-            //         value.push(list[i].value);
-            //     }
-            // }
             setInvites(selectedList);
         };
 
@@ -174,8 +164,6 @@ function Bidding({ updatePercents }) {
                                 }, 3000);
                             } else {
                                 // TODO: send request to update percentes and send invites
-                                
-
                                 const data = appointments.map((appointment) => {
                                     if (appointment.id === restProps.data.id)
                                         appointment.percents = percents;

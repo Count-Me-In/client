@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import classes from './App.module.css';
 import Login from './components/Login/Login'
 import Faculty from './components/Faculty/Faculty'
 import AppBar from "@material-ui/core/AppBar";
-import { Toolbar, Popper, Grow, ClickAwayListener, MenuItem, Paper, MenuList } from "@material-ui/core";
+import { Menu, Typography } from 'antd';
+import { Toolbar } from "@material-ui/core";
 import {
   BrowserRouter as Router,
   Switch,
@@ -17,13 +18,14 @@ import Bidding from './components/Bidding/Bidding';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
-import Typography from '@material-ui/core/Typography';
+// import Typography from '@material-ui/core/Typography';
 import PlanArrival from './components/PlanArrival/PlanArrival';
 import ManageEmployeePoints from './components/ManageEmployeePoints/ManageEmployeePoints';
 import Restrictions from './components/Restrictions/Restrictions';
 import Axios from 'axios';
 import { API_URL, TOKEN } from './Config/config';
 import 'antd/dist/antd.css';
+import SubMenu from 'antd/lib/menu/SubMenu';
 
 const theme = createMuiTheme({
   typography: {
@@ -48,17 +50,23 @@ const theme = createMuiTheme({
 
 function App() {
   const [tab, setTab] = useState();
-  const [openMenu, setOpen] = React.useState(false);
+  const [openMenu, setOpen] = useState(false);
   const [currPoints, setCurrPoints] = useState(undefined);//TODO: ask from server
   const [currPercents, setCurrPercents] = useState();//TODO: ask from server
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const userAuth = localStorage.getItem('auth');
+  const [anchorEl, setAnchorEl] = useState(null);
+  // const [userAuth, setAuth] = useState()
   const isManager = localStorage.getItem('isManager');
   const anchorRef = React.useRef(null);
+
+  // useEffect(() => {
+  const userAuth = localStorage.getItem('auth');
 
   if (userAuth) {
     Axios.defaults.headers.common["Authorization"] = userAuth
   }
+
+  //   setAuth(userAuth);
+  // }, [])
 
   const handleToggleMenu = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -96,12 +104,11 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-
       <Router>
-        <AppBar position="static">
+        <AppBar className={classes.header} color='inherit' position="static">
           <Toolbar className={classes.navbar}>
             <div className={classes.titleContainer}>
-              <label className={classes.mainTitle}><strong>Count Me In The Office!</strong></label>
+              <Typography.Title level={3}>Count Me In The Office!</Typography.Title>
             </div>
             {!userAuth &&
               <div>
@@ -135,63 +142,42 @@ function App() {
                   {currPoints !== undefined ? <label><strong>points: {currPoints}</strong></label> : null}
                   {currPercents ? <label><strong>Percents: {currPercents}%</strong></label> : null}
                 </div>
-                <div className={classes.tabs}>
-                  <Link to="/Home" onClick={() => setTab(1)} className={!userAuth || tab != 1 ? classes.link : classes.clickedLink}>
-                    <h3>Schedule</h3>
-                  </Link>
-                  <Link to="/bidding" onClick={() => setTab(2)} className={!userAuth || tab != 2 ? classes.link : classes.clickedLink} >
-                    <h3>Bidding</h3>
-                  </Link>
-                  {isManager &&
-                    <div className={classes.dropMenu}>
-                      <Button
-                        className={!userAuth || tab != 3 ? classes.link : classes.clickedLink}
-                        ref={anchorRef}
-                        aria-controls={open ? 'menu-list-grow' : undefined}
-                        aria-haspopup="true"
-                        onClick={handleToggleMenu}
-                      >
-                        Manager Panel
-                      </Button>
-                      <Popper className={classes.MenuList} open={openMenu} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
-                        {({ TransitionProps, placement }) => (
-                          <Grow
-                            {...TransitionProps}
-                            style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
-                          >
-                            <Paper>
-                              <ClickAwayListener onClickAway={handleCloseMenu}>
-                                <MenuList autoFocusItem={openMenu} id="menu-list-grow" onKeyDown={handleListKeyDown}>
-                                  <MenuItem onClick={handleMenuSelection}>
-                                    <Link to="/employeesPoints" onClick={() => setTab(3)}  >
-                                      Employees points
-                                    </Link>
-                                  </MenuItem>
-                                  <MenuItem onClick={handleMenuSelection}>
-                                    <Link to="/restriction" onClick={() => setTab(3)}  >
-                                      Days restriction
-                                    </Link>
-                                  </MenuItem>
-                                  {/* <MenuItem onClick={handleMenuSelection}>
-                                    <Link to="/arrival" onClick={() => setTab(3)}  >
-                                      Plan arrival
-                                    </Link>
-                                  </MenuItem> */}
-                                </MenuList>
-                              </ClickAwayListener>
-                            </Paper>
-                          </Grow>
-                        )}
-                      </Popper>
-                    </div>
-                  }
-                </div>
-                <Link onClick={() => {
-                  localStorage.setItem('auth',null)
-                  localStorage.setItem('isManager',null)
-                }} to="/" className={classes.logout}>
-                  <h3>log out</h3>
-                </Link>
+                <Menu theme='light' style={{  borderBottom: 'unset', fontSize: '20px', fontWeight: 'normal' }} onClick={(e) => setTab(e.key)} selectedKeys={[tab]} mode="horizontal">
+                  <Menu.Item key="Schedule">
+                    <Link to="/Home" className={!userAuth || tab != 1 ? classes.link : classes.clickedLink}>
+                      {/* <h3> */}
+                        Schedule
+                      {/* </h3> */}
+                    </Link>
+                  </Menu.Item>
+                  <Menu.Item key="Bidding" >
+                    <Link to="/bidding" className={!userAuth || tab != 2 ? classes.link : classes.clickedLink} >
+                      {/* <h3> */}
+                        Bidding
+                        {/* </h3> */}
+                    </Link>
+                  </Menu.Item>
+                  <SubMenu key="Manager Panel" style={!isManager ? { display: 'none' } : {}} disabled={!isManager} title="Manager Panel">
+                    <Menu.Item key="employeesPoints">
+                      <Link to="/employeesPoints">
+                        Employees points
+                      </Link>
+                    </Menu.Item>
+                    <Menu.Item key="restriction">
+                      <Link to="/restriction" >
+                        Days restriction
+                      </Link>
+                    </Menu.Item>
+                  </SubMenu>
+                  <Menu.Item key="logout">
+                    <Link onClick={() => {
+                      localStorage.setItem('auth', '')
+                      localStorage.setItem('isManager', '')
+                    }} to="/" className={classes.logout}>
+                      log out
+                    </Link>
+                  </Menu.Item>
+                </Menu>
               </div>
             }
           </Toolbar>
@@ -205,7 +191,7 @@ function App() {
           </PrivateRoute>
           <Route path="/login">
             <Login onLogin={(user) => {
-              setTab(1)
+              setTab('Schedule')
               localStorage.setItem('isManager', user.isManager)
               Axios.get(`${API_URL}/employees/employeePoints`).then(({ data }) => {
                 setCurrPoints(data)
@@ -220,10 +206,6 @@ function App() {
           <PrivateRoute isManager={true} path="/restriction">
             <Restrictions />
           </PrivateRoute>
-
-          {/* <PrivateRoute isManager={true} path="/arrival">
-            <PlanArrival />
-          </PrivateRoute> */}
           <Route path="/">
             <Redirect
               to={{
