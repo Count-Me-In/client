@@ -86,10 +86,14 @@ function Bidding({ updatePercents }) {
     const updateAppointmentsOnServer = (newAppointments) => {
 
         //first - update original bids object
+        console.log(newAppointments)
         var new_origin = originalBidsObj
         for (var i = 0; i < newAppointments.length; i++) {
             new_origin[i]['_percentage'] = newAppointments[i]['percents']
+            console.log(typeof(newAppointments[i]['percents']))
         }
+
+        
         setoriginalBidsObj(new_origin)
         console.log(originalBidsObj)
         Axios.put(`${API_URL}/employees/updateBids`, {}, {

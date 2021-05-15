@@ -56,9 +56,7 @@ function Restrictions() {
 
 
 
-    const addEmpRestriction = (employeeName, allowedDays) => {
-        console.log(employeeName)
-        console.log(allowedDays)
+    const createAllowedArr = (allowedDays) => {
         var allowed = [false, false, false, false, false]
         for (var i = 0; i < allowedDays.length; i++) {
             var day = allowedDays[i]
@@ -67,20 +65,20 @@ function Restrictions() {
             }
         }
         console.log(allowed)
-
-        updateRestrictions(empRestrictions.push({ name: employeeName, restrictions: allowed }))
+        return allowed
     }
 
     //triggered onpage load
     useEffect(() => {
         Axios.get(`${API_URL}/managers/getEmployeesRestrictions`).then(({ data }) => {
             console.log(data)
-
+            var restrictions = []
             for (const [key, value] of Object.entries(data)) {
-                addEmpRestriction(key, value['_allowed_days'])
+                restrictions.push({ name: key, restrictions: createAllowedArr(value['_allowed_days'])})
             }
+            updateRestrictions(restrictions)
             console.log(empRestrictions)
-            if (empRestrictions.lengh > 0) {
+            if (empRestrictions.length > 0) {
                 selectEmployee(empRestrictions[0])
             }
         }).catch((err) => console.log(err))
@@ -92,7 +90,7 @@ function Restrictions() {
         const newEmpRestriction = empRestrictions.map((emp) => emp.name !== employee.name ? emp : { name: emp.name, restrictions });
         const updatedEmployee = newEmpRestriction.find((emp) => emp.name === employee.name)
 
-        //TODO: need to check
+
         const name = updatedEmployee.name
         var allowed = []
         for(var i = 0; i < restrictions.length; i++){
@@ -100,9 +98,12 @@ function Restrictions() {
                 allowed.push(i)
             }
         }
+        console.log(allowed)
+        console.log(name)
+
         Axios.put(`${API_URL}/managers/setRestrictions`, {}, {
             params: {
-                'restriction': allowed,
+                'restriction': {'_allowed_days': allowed},
                 'employee_username': name,
             }
         }).then(() => {
