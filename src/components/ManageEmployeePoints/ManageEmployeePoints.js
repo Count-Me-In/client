@@ -1,51 +1,74 @@
-import React, { useState, Text} from 'react';
+import React, { useState, useEffect } from 'react';
 import classes from './ManageEmployeePoints.module.css'
-import { TextField} from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 import EmployeePoints from './EmployeePoints/EmployeePoints';
+import Axios from 'axios';
+import { API_URL, TOKEN } from '../../Config/config';
 
 function ManageEmployeePoints() {
-    const [totalPoints, setTotalPoints] = useState(250);
-    const [employees, updateEmpPoints] = useState([
-        {
-            id:1,
-            name: "Shenhav",
-            points: 40
-        },
-        {
-            id:2,
-            name: "Noy",
-            points: 50
-        },
-        {
-            id:3,
-            name: "Nufar",
-            points: 100
-        },
-        {
-            id:4,
-            name: "Shauli",
-            points: 10
-        }
-    ])
+    const [totalPoints, setTotalPoints] = useState(0);
+    const [leftToSplit, setPointsLeft] = useState(0);
+    const [employees, updateEmpPoints] = useState([])
+
+    useEffect(() => {
+        Promise.all([Axios.get(`${API_URL}/managers/getTotalPoints`), Axios.get(`${API_URL}/managers/getEmployeesPoints`)])
+            .then(([totalPointsData, epmPointsData]) => {
+                setTotalPoints(totalPointsData.data);
+                var id = 1;
+                var result = Array()
+                for (const [key, value] of Object.entries(epmPointsData.data)) {
+                    result.push({ id: id, name: key, points: value })
+                    id++
+                }
+
+
+                const sum = result.reduce((lastPoints, emp) => +emp.points + +lastPoints, 0)
+                updateEmpPoints(result)
+            }).catch((err) => console.log(err))
+    }, []);
 
     function handlePointsChange(empName, points) {
-        const updatedEmp = employees.map((emp) => emp.name === empName ? {...emp, points:points} : emp)
+        const updatedEmp = employees.map((emp) => emp.name === empName ? { ...emp, points: points } : emp)
         const sum = updatedEmp.reduce((lastPoints, emp) => +emp.points + +lastPoints, 0)
-        
-        if (sum > totalPoints)
-            return false;
 
+        if (sum > totalPoints) {
+            return false;
+        }
+
+        setPointsLeft(totalPoints - sum);
         updateEmpPoints(updatedEmp);
         return true;
     }
 
+    function updatePoints() {
+        // const empNames = []
+        // const empPoints = [];
+
+        // employees.forEach((emp) => {
+        //     empNames.push(emp.name)
+        //     empPoints.push(emp.points)
+        // })
+        Axios.post(`${API_URL}/managers/setEmployeePoints`, {}, {
+            params: {
+                'employeename': 'empName',
+                'points': '1',
+            }
+        }).then(() => {
+            alert('Points update succesfully')
+        })
+    }
+
     return (
-        <div>
+        <div className={classes.container}>
             <h1 className={classes.header}>Manage Employees Points</h1>
             <div className={classes.empBox}>
                 {employees.map((emp) => <EmployeePoints onPointsChanged={handlePointsChange} key={emp.id} name={emp.name} points={emp.points}></EmployeePoints>)}
-            </div>  
-            <h1 className={classes.totalPoints}>Total Points: {totalPoints}</h1>
+            </div>
+            <Button onClick={updatePoints} style={{ width: 'fit-content', margin: '5px' }} variant="contained" color="primary">
+                Update points
+            </Button>
+            <h1 className={classes.totalPoints}>Total points: {totalPoints}</h1>
+            <h1 className={classes.totalPoints}>Points left to split: {leftToSplit}</h1>
         </div>)
 }
 

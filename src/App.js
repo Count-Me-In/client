@@ -31,7 +31,7 @@ const theme = createMuiTheme({
   palette: {
     primary: {
       light: "#6abba7",
-      main: "#ff9800",
+      main: "#4d79ff",
       dark: "#307766",
       contrastText: "#fff",
     },
@@ -46,15 +46,18 @@ const theme = createMuiTheme({
 
 
 function App() {
-  const [loggedUser, setUser] = useState({});
   const [tab, setTab] = useState();
   const [openMenu, setOpen] = React.useState(false);
   const [currPoints, setCurrPoints] = useState(undefined);//TODO: ask from server
   const [currPercents, setCurrPercents] = useState();//TODO: ask from server
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const isLoggedIn = Object.keys(loggedUser).length != 0;
+  const userAuth = localStorage.getItem('auth');
+  const isManager = localStorage.getItem('isManager');
   const anchorRef = React.useRef(null);
 
+  if (userAuth) {
+    Axios.defaults.headers.common["Authorization"] = userAuth
+  }
 
   const handleToggleMenu = () => {
     setOpen((prevOpen) => !prevOpen);
@@ -99,7 +102,7 @@ function App() {
             <div className={classes.titleContainer}>
               <label className={classes.mainTitle}><strong>Count Me In The Office!</strong></label>
             </div>
-            {!isLoggedIn &&
+            {!userAuth &&
               <div>
                 <Button className={classes.Info} aria-describedby={id} variant="contained" color="primary" onClick={handleClick}>
                   info
@@ -125,23 +128,23 @@ function App() {
                 </Popover>
               </div>
             }
-            {isLoggedIn &&
+            {userAuth &&
               <div className={classes.navbarChild}>
                 <div className={classes.biddindData}>
                   {currPoints !== undefined ? <label><strong>points: {currPoints}</strong></label> : null}
                   {currPercents ? <label><strong>Percents: {currPercents}%</strong></label> : null}
                 </div>
                 <div className={classes.tabs}>
-                  <Link to="/Home" onClick={() => setTab(1)} className={!isLoggedIn || tab != 1 ? classes.link : classes.clickedLink}>
+                  <Link to="/Home" onClick={() => setTab(1)} className={!userAuth || tab != 1 ? classes.link : classes.clickedLink}>
                     <h3>Schedule</h3>
                   </Link>
-                  <Link to="/bidding" onClick={() => setTab(2)} className={!isLoggedIn || tab != 2 ? classes.link : classes.clickedLink} >
+                  <Link to="/bidding" onClick={() => setTab(2)} className={!userAuth || tab != 2 ? classes.link : classes.clickedLink} >
                     <h3>Bidding</h3>
                   </Link>
-                  {loggedUser.isManager &&
+                  {isManager &&
                     <div className={classes.dropMenu}>
                       <Button
-                        className={!isLoggedIn || tab != 3 ? classes.link : classes.clickedLink}
+                        className={!userAuth || tab != 3 ? classes.link : classes.clickedLink}
                         ref={anchorRef}
                         aria-controls={open ? 'menu-list-grow' : undefined}
                         aria-haspopup="true"
@@ -182,7 +185,10 @@ function App() {
                     </div>
                   }
                 </div>
-                <Link onClick={() => { setUser({}) }} to="/" className={classes.logout}>
+                <Link onClick={() => {
+                  localStorage.setItem('auth',null)
+                  localStorage.setItem('isManager',null)
+                }} to="/" className={classes.logout}>
                   <h3>log out</h3>
                 </Link>
               </div>
@@ -190,36 +196,31 @@ function App() {
           </Toolbar>
         </AppBar >
         <Switch>
-          <PrivateRoute loggedUser={loggedUser} path="/home">
-            <HomePage loggedUser={loggedUser} />
+          <PrivateRoute path="/home">
+            <HomePage />
           </PrivateRoute>
-          <PrivateRoute loggedUser={loggedUser} path="/bidding">
+          <PrivateRoute path="/bidding">
             <Bidding updatePercents={(p) => { setCurrPercents(p) }} />
           </PrivateRoute>
           <Route path="/login">
             <Login onLogin={(user) => {
               setTab(1)
-              setUser(user)
-              const token = TOKEN();
-              Axios.get(`${API_URL}/employees/employeePoints`, {
-                headers: {
-                  'Authorization': `Bearer ${TOKEN()}`,
-                }
-              }).then(({ data }) => {
+              localStorage.setItem('isManager', user.isManager)
+              Axios.get(`${API_URL}/employees/employeePoints`).then(({ data }) => {
                 setCurrPoints(data)
               })
             }} />
           </Route>
 
-          <PrivateRoute loggedUser={loggedUser} isManager={true} path="/employeesPoints">
+          <PrivateRoute isManager={true} path="/employeesPoints">
             <ManageEmployeePoints />
           </PrivateRoute>
 
-          <PrivateRoute loggedUser={loggedUser} isManager={true} path="/restriction">
+          <PrivateRoute isManager={true} path="/restriction">
             <Restrictions />
           </PrivateRoute>
 
-          <PrivateRoute loggedUser={loggedUser} isManager={true} path="/arrival">
+          <PrivateRoute isManager={true} path="/arrival">
             <PlanArrival />
           </PrivateRoute>
           <Route path="/">
@@ -236,11 +237,11 @@ function App() {
   );
 }
 
-function PrivateRoute({ children, loggedUser, isManager }) {
+function PrivateRoute({ children, isManager }) {
   return (
     <Route
       render={({ location }) =>
-        Object.keys(loggedUser).length === 0 ?
+        !localStorage.getItem('auth') ?
           (
             <Redirect
               to={{
@@ -248,7 +249,7 @@ function PrivateRoute({ children, loggedUser, isManager }) {
                 state: { from: location }
               }}
             />
-          ) : loggedUser.isManager || !isManager ?
+          ) : localStorage.getItem('isManager') || !isManager ?
             (children) :
             (
               <Redirect

@@ -8,12 +8,11 @@ import HomePage from '../HomePage/HomePage'
 import { useHistory } from 'react-router-dom';
 import { Checkbox, FormControlLabel } from '@material-ui/core';
 import Axios from 'axios';
-import { API_URL, setToken } from '../../Config/config';
+import { API_URL } from '../../Config/config';
 
 function Login({ onLogin }) {
     const history = useHistory();
     const [showAlert, setAlert] = useState(false);
-    const [isManager, setIsManager] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const validate = () => {
@@ -27,12 +26,15 @@ function Login({ onLogin }) {
                 username,
                 password
             }).then(({data}) => {
-                setToken(data.token)
+                Axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`
+                localStorage.setItem('auth', `Bearer ${data.token}`)
                 onLogin({ username, isManager: true })
                 history.replace("home");
             }).catch((err)=> console.log(err))
         }
     }
+
+    
 
     return (
         <div className={classes.container}>
