@@ -67,8 +67,7 @@ function ManageEmployeePoints() {
             <Button onClick={updatePoints} style={{ width: 'fit-content', margin: '5px' }} variant="contained" color="primary">
                 Update points
             </Button>
-            <h1 className={classes.totalPoints}>Total points: {totalPoints}</h1>
-            <h1 className={classes.totalPoints}>Points left to split: {leftToSplit}</h1>
+            <h1 className={classes.totalPoints}>Points left to split: {leftToSplit}/{totalPoints}</h1>
         </div>)
 }
 
