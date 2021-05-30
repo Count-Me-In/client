@@ -48,10 +48,16 @@ function ManageEmployeePoints() {
         //     empNames.push(emp.name)
         //     empPoints.push(emp.points)
         // })
+
+        const employeesPoints = {}
+        employees.forEach(element => {
+            employeesPoints[element.name] = element.points
+        })
+        console.log(employees)
+        console.log(employeesPoints)
         Axios.post(`${API_URL}/managers/setEmployeePoints`, {}, {
             params: {
-                'employeename': 'empName',
-                'points': '1',
+                'employeesPoints': employeesPoints
             }
         }).then(() => {
             alert('Points update succesfully')
