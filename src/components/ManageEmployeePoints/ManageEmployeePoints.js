@@ -28,7 +28,7 @@ function ManageEmployeePoints() {
     }, []);
 
     function handlePointsChange(empName, points) {
-        const updatedEmp = employees.map((emp) => emp.name === empName ? { ...emp, points: points } : emp)
+        const updatedEmp = employees.map((emp) => emp.name === empName ? { ...emp, points: parseInt(points) } : emp)
         const sum = updatedEmp.reduce((lastPoints, emp) => +emp.points + +lastPoints, 0)
 
         if (sum > totalPoints) {
