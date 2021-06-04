@@ -95,21 +95,20 @@ function Bidding({ updatePercents }) {
         }
 
         
-        setoriginalBidsObj(new_origin)
         console.log(originalBidsObj)
-        Axios.put(`${API_URL}/employees/updateBids`, {}, {
-            params: {
-                'bids': originalBidsObj,
-            }
-        }).catch((err) => { console.log(err) })
+        Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
+        .then((response)=>{
+            setoriginalBidsObj(new_origin);
+        })
+        .catch((err) => { console.log(err) })
     }
 
     const sendInvites = () => {
-        Axios.put(`${API_URL}/employees/invites`, {}, {
-            params: {
-                'invites': invites,
-            }
-        }).catch((err) => { console.log(err) })
+        // Axios.put(`${API_URL}/employees/invites`, {}, {
+        //     params: {
+        //         'invites': invites,
+        //     }
+        // }).catch((err) => { console.log(err) })
     }
 
     const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)

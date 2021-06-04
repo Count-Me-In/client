@@ -101,9 +101,8 @@ function Restrictions() {
         console.log(allowed)
         console.log(name)
 
-        Axios.put(`${API_URL}/managers/setRestrictions`, {}, {
+        Axios.post(`${API_URL}/managers/setRestrictions`, {'_allowed_days': allowed}, {
             params: {
-                'restriction': {'_allowed_days': allowed},
                 'employee_username': name,
             }
         }).then(() => {
