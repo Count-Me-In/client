@@ -1,8 +1,11 @@
 /// <reference types="cypress" />
 
-context('Log in page appearance tests', () => {
+context('Home page appearance tests', () => {
     beforeEach(() => {
         cy.visit('http://localhost:3000/login')
+        cy.get('[data-testid=nameField]').type('admin')
+        cy.get('[data-testid=passwordField]').type('password')
+        cy.get('[data-testid=loginBtn]').click()
     })
 
     it('We can see the logged in nav bar', () => {
@@ -17,6 +20,4 @@ context('Log in page appearance tests', () => {
     it('We can see the arrival schedule', () => {
         cy.get('[data-testid=arrivalScheduleCalander]').should('exist')
     })
-
-    // it('We can see the dates navigations ')
 })

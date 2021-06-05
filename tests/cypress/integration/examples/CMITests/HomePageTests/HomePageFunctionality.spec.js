@@ -1,11 +1,10 @@
 /// <reference types="cypress" />
 
-context('Log in page appearance tests', () => {
+context('Home page functionality tests', () => {
     beforeEach(() => {
       cy.visit('http://localhost:3000/login')
-    })
-  
-    it('We have correct page title', () => {
-      cy.contains("Login")
+      cy.get('[data-testid=nameField]').type('admin')
+      cy.get('[data-testid=passwordField]').type('password')
+      cy.get('[data-testid=loginBtn]').click()    
     })
 })

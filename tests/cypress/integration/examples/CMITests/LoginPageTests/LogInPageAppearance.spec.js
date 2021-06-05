@@ -6,7 +6,6 @@ context('Log in page appearance tests', () => {
   })
 
   it('We have correct page title', () => {
-    cy.contains("Login")
   })
 
   it('We cant see the logged in nav bar', () => {
