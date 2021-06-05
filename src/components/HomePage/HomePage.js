@@ -114,7 +114,7 @@ function HomePage({isManager, setIsManager}) {
             }
 
             <Paper dir={'ltr'}>
-                <Scheduler
+                <Scheduler data-testid="arrivalScheduleCalander"
                     data={scheduler}
                 // height={650}
                 >

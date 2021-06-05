@@ -129,11 +129,11 @@ function Bidding({ updatePercents }) {
 
         return (
             <Appointments.AppointmentContent  {...restProps}>
-                <div className={classes.container}>
-                    <div>
+                <div className={classes.container} data-testid="biddingSlots">
+                    <div data-testid="biddingCalendar">
                         {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
                             + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
-                    <Select
+                    <Select data-testid="inviteFriend"
                         mode="multiple"
                         allowClear
                         showSearch
@@ -150,7 +150,7 @@ function Bidding({ updatePercents }) {
                         ))}
                     </Select>
                     <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <TextField
+                        <TextField data-testid="percentsSlots"
                             type="number"
                             size="small"
                             label="Percents"
@@ -198,7 +198,7 @@ function Bidding({ updatePercents }) {
                     />
                 </Scheduler>
             </Paper>
-            <Button
+            <Button data-testid="saveBiddingBtn"
                 type='primary'
                 shape='round'
                 size='large'
