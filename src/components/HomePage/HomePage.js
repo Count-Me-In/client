@@ -48,15 +48,18 @@ function HomePage({isManager, setIsManager}) {
         }));
     }
 
-
-    //triggered on page upload
-    useEffect(() => {
+    const showEmployeeSched = () => {
         Axios.get(`${API_URL}/employees/getEmployeeAssigning`).then(({ data }) => {
             var app = datesToScheduler(data.assignedDays)
             console.log(app);
             setUserScheduler(app)
             setScheduler(app)
         }).catch((err) => console.log(err))
+    }
+
+    //triggered on page upload
+    useEffect(() => {
+        showEmployeeSched();
 
         Axios.get(`${API_URL}/managers/getEmployees`).then(({ data }) => {
             setEmployees(data);
@@ -99,14 +102,15 @@ function HomePage({isManager, setIsManager}) {
                         id="employees"
                         size='small'
                         options={employees}
-                        getOptionLabel={(option) => option}
+                        getOptionLabel={(option) => option.name}
                         style={{ width: 300 }}
                         renderInput={(params) => <TextField {...params} label="Emplyee name" variant="outlined" />}
                         onChange={(event, value) => {
                             if (value) {
-                                getEmployeeScheduler(value)
-                                console.log(scheduler)
-                                //setScheduler(employeesSechudel.filter(emp => emp.name === value)[0].schedule)
+                                getEmployeeScheduler(value.username)
+                            }
+                            else {
+                                showEmployeeSched();
                             }
                         }}
                     />
