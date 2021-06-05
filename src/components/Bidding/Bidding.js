@@ -105,9 +105,8 @@ function Bidding({ updatePercents }) {
 
     const sendInvites = (invites) => {
         console.log(invites)
-        Axios.post(`${API_URL}/employees/invites`, invites, {}).then((response)=>{
-            setInvites(invites);
-        }).catch((err) => { console.log(err) })
+        Axios.post(`${API_URL}/employees/invites`, invites, {})
+        .catch((err) => { console.log(err) })
     }
 
     const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
