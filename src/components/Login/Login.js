@@ -22,6 +22,7 @@ function Login({ onLogin }) {
                 setAlert(false)
             }, 3000);
         } else {
+            console.log(username)
             Axios.post(`${API_URL}/authenticate`, {
                 username,
                 password

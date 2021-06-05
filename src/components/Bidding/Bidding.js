@@ -104,10 +104,9 @@ function Bidding({ updatePercents }) {
     }
 
     const sendInvites = (invites) => {
-        Axios.put(`${API_URL}/employees/invites`, {}, {
-            params: {
-                'invites': invites,
-            }
+        console.log(invites)
+        Axios.post(`${API_URL}/employees/invites`, invites, {}).then((response)=>{
+            setInvites(invites);
         }).catch((err) => { console.log(err) })
     }
 
@@ -164,6 +163,7 @@ function Bidding({ updatePercents }) {
                             showSearch
                             style={{ width: '100%' }}
                             placeholder="Invite a friend"
+
 
                             filterOption={(input, option) => {
                                 return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
