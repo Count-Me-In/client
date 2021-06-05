@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 import classes from './App.module.css';
 import Login from './components/Login/Login'
-import Faculty from './components/Faculty/Faculty'
 import AppBar from "@material-ui/core/AppBar";
 import { Menu, Typography } from 'antd';
 import { Toolbar } from "@material-ui/core";
@@ -18,7 +17,6 @@ import Bidding from './components/Bidding/Bidding';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
-// import Typography from '@material-ui/core/Typography';
 import PlanArrival from './components/PlanArrival/PlanArrival';
 import ManageEmployeePoints from './components/ManageEmployeePoints/ManageEmployeePoints';
 import Restrictions from './components/Restrictions/Restrictions';
@@ -55,7 +53,7 @@ function App() {
   const [currPercents, setCurrPercents] = useState();//TODO: ask from server
   const [anchorEl, setAnchorEl] = useState(null);
   // const [userAuth, setAuth] = useState()
-  const isManager = localStorage.getItem('isManager');
+  const [isManager, setIsManager] = React.useState(false);
   const anchorRef = React.useRef(null);
 
   // useEffect(() => {
@@ -172,7 +170,7 @@ function App() {
                   <Menu.Item key="logout">
                     <Link onClick={() => {
                       localStorage.setItem('auth', '')
-                      localStorage.setItem('isManager', '')
+                      setIsManager(false);
                     }} to="/" className={classes.logout}>
                       log out
                     </Link>
@@ -184,26 +182,25 @@ function App() {
         </AppBar >
         <Switch>
           <PrivateRoute path="/home">
-            <HomePage />
+            <HomePage isManager={isManager} setIsManager={setIsManager} />
           </PrivateRoute>
           <PrivateRoute path="/bidding">
             <Bidding updatePercents={(p) => { setCurrPercents(p) }} />
           </PrivateRoute>
           <Route path="/login">
-            <Login onLogin={(user) => {
+            <Login onLogin={() => {
               setTab('Schedule')
-              localStorage.setItem('isManager', user.isManager)
               Axios.get(`${API_URL}/employees/employeePoints`).then(({ data }) => {
                 setCurrPoints(data)
               })
             }} />
           </Route>
 
-          <PrivateRoute isManager={true} path="/employeesPoints">
+          <PrivateRoute isManager={isManager} path="/employeesPoints">
             <ManageEmployeePoints />
           </PrivateRoute>
 
-          <PrivateRoute isManager={true} path="/restriction">
+          <PrivateRoute isManager={isManager} path="/restriction">
             <Restrictions />
           </PrivateRoute>
           <Route path="/">
@@ -232,7 +229,7 @@ function PrivateRoute({ children, isManager }) {
                 state: { from: location }
               }}
             />
-          ) : localStorage.getItem('isManager') || !isManager ?
+          ) : isManager === undefined || isManager ?
             (children) :
             (
               <Redirect

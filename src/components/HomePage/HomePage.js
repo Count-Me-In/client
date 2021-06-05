@@ -26,7 +26,7 @@ const allocations = [
     { text: 'Maybe next time', id: 0, color: grey },
 ];
 
-function HomePage() {
+function HomePage({isManager, setIsManager}) {
     const [currentDate, setDate] = useState(Date.now);
     const [userScheduler, setUserScheduler] = useState([]);
     const [scheduler, setScheduler] = useState([]);
@@ -41,30 +41,27 @@ function HomePage() {
 
 
     const datesToScheduler = (dateLst) => {
-        var sched = Array()
-        for (var i = 0; i < dateLst.length; i++) {
-            let startDate = (dateLst[i] || '').split(':')
-            startDate[1] = "15"
-            sched.push({ startDate: dateLst[i], endDate: startDate.join(':'), isIn: 1 })
-        }
-        console.log(sched)
-        return sched
+        return dateLst.map(dt => ({
+            startDate: (new Date(dt * 1000)).toISOString(),
+            endDate: (new Date((dt + 86400) * 1000)).toISOString(),
+            title: 'Day In The Office'
+        }));
     }
 
 
     //triggered on page upload
     useEffect(() => {
         Axios.get(`${API_URL}/employees/getEmployeeAssigning`).then(({ data }) => {
-            var app = datesToScheduler(data._assignedDays)
+            var app = datesToScheduler(data.assignedDays)
+            console.log(app);
             setUserScheduler(app)
             setScheduler(app)
         }).catch((err) => console.log(err))
 
-        if (localStorage.getItem('isManager')) {
-            Axios.get(`${API_URL}/managers/getEmployees`).then(({ data }) => {
-                setEmployees(data)
-            }).catch((err) => console.log(err))
-        }
+        Axios.get(`${API_URL}/managers/getEmployees`).then(({ data }) => {
+            setEmployees(data);
+            setIsManager(data.length > 0);
+        }).catch((err) => console.log(err))
     }, []);
 
     const getEmployeeScheduler = (employeeName) => {
@@ -95,7 +92,7 @@ function HomePage() {
 
     return (
         <div>
-            {localStorage.getItem('isManager') &&
+            {isManager &&
                 <div className={classes.customActions}>
                     <Button onClick={() => setScheduler(userScheduler)}>My Schedule</Button>
                     <Autocomplete
