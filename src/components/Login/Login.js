@@ -41,15 +41,15 @@ function Login({ onLogin }) {
             <div className={classes.formLayout}>
                 <h2 className={classes.title}>Login</h2>
                 <form className={classes.loginBox}>
-                    <TextField className={classes.loginInput} value={username} onChange={(event) => setUsername(event.target.value)} id="username" label="username" variant="filled" color="secondary" />
-                    <TextField className={classes.loginInput} value={password} onChange={(event) => setPassword(event.target.value)} id="password" label="password" type="password" variant="filled" color="secondary" />
-                    <Button className={classes.loginBtn} variant="outlined" size="medium" onClick={validate}>
+                    <TextField className={classes.loginInput} data-testid="nameField" value={username} onChange={(event) => setUsername(event.target.value)} id="username" label="username" variant="filled" color="secondary" />
+                    <TextField className={classes.loginInput} data-testid="passwordField" value={password} onChange={(event) => setPassword(event.target.value)} id="password" label="password" type="password" variant="filled" color="secondary" />
+                    <Button className={classes.loginBtn} data-testid="loginBtn" variant="outlined" size="medium" onClick={validate}>
                         Login
                 </Button>
                 </form>
                 {showAlert &&
                     <Alert severity="error">
-                        <AlertTitle>Error</AlertTitle>
+                        <AlertTitle data-testid="loginAlert">Error</AlertTitle>
                     Password and username are required
                 </Alert>
                 }

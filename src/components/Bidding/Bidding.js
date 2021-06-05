@@ -104,7 +104,7 @@ function Bidding({ updatePercents }) {
     }
 
     const sendInvites = (invites) => {
-            Axios.put(`${API_URL}/employees/invites`, {}, {
+        Axios.put(`${API_URL}/employees/invites`, {}, {
             params: {
                 'invites': invites,
             }
@@ -144,7 +144,7 @@ function Bidding({ updatePercents }) {
                 setAppointments(newAppointments)
             } else {
                 setAlert(true)
-                setTimeout(()=> {
+                setTimeout(() => {
                     setAlert(false)
                 }, 3000)
             }
@@ -152,12 +152,13 @@ function Bidding({ updatePercents }) {
 
         return (
             <Appointments.AppointmentContent  {...restProps}>
-                <div className={classes.container}>
-                    <div>
+                <div className={classes.container} data-testid="biddingSlots">
+                    <div data-testid="biddingCalendar">
                         {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
                             + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
                     <Form.Item name={['invites', restProps.data.id - 1]}>
                         <Select
+                            data-testid="inviteFriend"
                             mode="multiple"
                             allowClear
                             showSearch
@@ -175,6 +176,7 @@ function Bidding({ updatePercents }) {
                     </Form.Item>
                     <Form.Item label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         <InputNumber
+                            data-testid="percentsSlots"
                             // className={classes.percent}
                             defaultValue={percents}
                             onChange={handlePercentsChange} />
@@ -224,6 +226,7 @@ function Bidding({ updatePercents }) {
                     </Scheduler>
                 </Paper>
                 <Button
+                    data-testid="saveBiddingBtn"
                     type='primary'
                     shape='round'
                     size='large'

@@ -22,14 +22,15 @@ function ManageEmployeePoints() {
                 }
 
 
-                const sum = result.reduce((lastPoints, emp) => +emp.points + +lastPoints, 0)
+                const sum = result.reduce((lastPoints, emp) => emp.points + lastPoints, 0)
                 updateEmpPoints(result)
+                setPointsLeft(totalPointsData.data - sum)
             }).catch((err) => console.log(err))
     }, []);
 
     function handlePointsChange(empName, points) {
         const updatedEmp = employees.map((emp) => emp.name === empName ? { ...emp, points: parseInt(points) } : emp)
-        const sum = updatedEmp.reduce((lastPoints, emp) => +emp.points + +lastPoints, 0)
+        const sum = updatedEmp.reduce((lastPoints, emp) => emp.points + lastPoints, 0)
 
         if (sum > totalPoints) {
             return false;
@@ -41,13 +42,6 @@ function ManageEmployeePoints() {
     }
 
     function updatePoints() {
-        // const empNames = []
-        // const empPoints = [];
-
-        // employees.forEach((emp) => {
-        //     empNames.push(emp.name)
-        //     empPoints.push(emp.points)
-        // })
 
         // const employeesPoints = {}
         const employeesPoints = employees.map(element => {
@@ -58,10 +52,8 @@ function ManageEmployeePoints() {
         })
         console.log(employees)
         console.log(employeesPoints)
-        Axios.post(`${API_URL}/managers/setEmployeePoints`, {
-            employeesPoints: employeesPoints
-        }, {   
-        }).then(() => {
+        Axios.post(`${API_URL}/managers/setEmployeePoints`, employeesPoints
+        ).then(() => {
             alert('Points update succesfully')
         })
     }

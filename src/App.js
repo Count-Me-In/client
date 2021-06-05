@@ -110,7 +110,7 @@ function App() {
             </div>
             {!userAuth &&
               <div>
-                <Button className={classes.Info} aria-describedby={id} variant="contained" color="primary" onClick={handleClick}>
+                <Button className={classes.Info} data-testid="InfoBtn" aria-describedby={id} variant="contained" color="primary" onClick={handleClick}>
                   info
                 </Button>
                 <Popover
@@ -127,7 +127,7 @@ function App() {
                     horizontal: 'center',
                   }}
                 >
-                  <Typography className={classes.typography}>
+                  <Typography data-testid="infoBtnText" className={classes.typography}>
                     Welcome to Count Me In The Office!
                     באתר זה תוכלו להרשם להרצאות המתקיימות הסמסטר בצורה היברידית והמערכת תחשב ותבחר מי יורשה להכנס לשיעור הפרונטלי בצורה הוגנת. הינך מקבל סך נקודות שבועיות אשר מצטברות משבוע לשבוע. עלייך לחלק את הנקודות שברשותך בין הקורסים הנמצאים במערכת השעות שלך. החלוקה תעשה בעזרת חלוקת אחוזים. ברשותך 100% אותם תוכל לחלק בין הקורסים השונים. שים לב כי החלוקה נתונה לשיקול דעתך, אינך חייב לחלק את כל האחוזים ואינך חייב לחלק אחוזים לכל קורס. לאחר מכן המערכת תשקלל את בחירות כל התלמידים ותבחר מי ייכנס לכל שיעור. את חלוקת האחוזים תוכל לשנות באופן דינאמי בלשונית biding.
     את מערכת השעות והשיבוצים לשבועיים הקרובים תוכל לראות בלשונית schedule כאשר השיעורים אליהם הצלחת להיכנס יסומנו בירוק, ואלה שלא יסומנו באפור. שים לב שכל חלוקת אחוזים רלוונטית לשבוע השלישי.</Typography>
@@ -142,20 +142,20 @@ function App() {
                 </div>
                 <Menu theme='light' style={{  borderBottom: 'unset', fontSize: '20px', fontWeight: 'normal' }} onClick={(e) => setTab(e.key)} selectedKeys={[tab]} mode="horizontal">
                   <Menu.Item key="Schedule">
-                    <Link to="/Home" className={!userAuth || tab != 1 ? classes.link : classes.clickedLink}>
+                    <Link to="/Home" className={!userAuth || tab != 1 ? classes.link : classes.clickedLink} data-testid="scheduleLink">
                       {/* <h3> */}
                         Schedule
                       {/* </h3> */}
                     </Link>
                   </Menu.Item>
                   <Menu.Item key="Bidding" >
-                    <Link to="/bidding" className={!userAuth || tab != 2 ? classes.link : classes.clickedLink} >
+                    <Link to="/bidding" className={!userAuth || tab != 2 ? classes.link : classes.clickedLink} data-testid="biddingLink">
                       {/* <h3> */}
                         Bidding
                         {/* </h3> */}
                     </Link>
                   </Menu.Item>
-                  <SubMenu key="Manager Panel" style={!isManager ? { display: 'none' } : {}} disabled={!isManager} title="Manager Panel">
+                  <SubMenu key="Manager Panel" data-testid="managerPanelLink" style={!isManager ? { display: 'none' } : {}} disabled={!isManager} title="Manager Panel">
                     <Menu.Item key="employeesPoints">
                       <Link to="/employeesPoints">
                         Employees points
@@ -168,7 +168,7 @@ function App() {
                     </Menu.Item>
                   </SubMenu>
                   <Menu.Item key="logout">
-                    <Link onClick={() => {
+                    <Link data-testid="logoutBtn" onClick={() => {
                       localStorage.setItem('auth', '')
                       setIsManager(false);
                     }} to="/" className={classes.logout}>
