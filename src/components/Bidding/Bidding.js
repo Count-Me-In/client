@@ -8,9 +8,8 @@ import {
     Appointments,
     Toolbar,
 } from '@devexpress/dx-react-scheduler-material-ui';
-import { Button, Select } from 'antd';
+import { Button, Form, Input, InputNumber, Select } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
-import { TextField, IconButton, FormControl, InputLabel, Input, MenuItem, Checkbox, ListItemText } from '@material-ui/core';
 import SaveIcon from '@material-ui/icons/Save';
 import { ViewState } from '@devexpress/dx-react-scheduler';
 import Axios from 'axios';
@@ -27,6 +26,8 @@ const getNextSunday = () => {
 }
 
 function Bidding({ updatePercents }) {
+    const [form] = Form.useForm();
+
     let sunday = getNextSunday();
     const tempDate = new Date(sunday);
     let monday = new Date(tempDate.setDate(tempDate.getDate() + 1));
@@ -50,32 +51,33 @@ function Bidding({ updatePercents }) {
     ]
 
     const [appointments, setAppointments] = useState(schedulerData);
-    const [invites, setInvites] = useState([[], [], [], [], []])
     const [employees, setEmployees] = useState([]);
     const [originalBidsObj, setoriginalBidsObj] = useState([]);
     const [showAlert, setAlert] = useState(false);
 
     //triggered onpage load
     useEffect(() => {
-        Promise.all([Axios.get(`${API_URL}/employees/all`), Axios.get(`${API_URL}/employees/bids_collection`)]).then(([employees, BidCollection]) => {
-            console.log(BidCollection.data)
-            console.log(employees.data);
-            if (BidCollection.data.length === 5) {
-                updateAppointments(BidCollection.data)
+        Axios.get(`${API_URL}/employees/all`).then(({ data: employees }) => {
+
+            if (employees?.length > 0) {
+                setEmployees(employees)
             }
-            if (employees?.data?.length > 0) {
-                setEmployees(employees?.data)
+        }).catch((err) => console.log(err))
+
+        Axios.get(`${API_URL}/employees/bids_collection`).then(({ data: BidCollection }) => {
+            if (BidCollection.length === 5) {
+                updateAppointments(BidCollection)
             }
         }).catch((err) => console.log(err))
     }, []);
 
     //update appointments on first upload and on every change
     const updateAppointments = (data) => {
-        const newAppontments = appointments.map((appointment) => {
+        const newAppointments = appointments.map((appointment) => {
             appointment.percents = data[appointment.id - 1].percentage;
             return appointment;
         })
-        setAppointments(newAppontments)
+        setAppointments(newAppointments)
         setoriginalBidsObj(data)
 
         let sum = 0;//TODO: need this?
@@ -95,18 +97,18 @@ function Bidding({ updatePercents }) {
         }
 
         Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
-        .then((response)=>{
-            setoriginalBidsObj(new_origin);
-        })
-        .catch((err) => { console.log(err) })
+            .then((response) => {
+                setoriginalBidsObj(new_origin);
+            })
+            .catch((err) => { console.log(err) })
     }
 
-    const sendInvites = () => {
-        // Axios.put(`${API_URL}/employees/invites`, {}, {
-        //     params: {
-        //         'invites': invites,
-        //     }
-        // }).catch((err) => { console.log(err) })
+    const sendInvites = (invites) => {
+        Axios.put(`${API_URL}/employees/invites`, {}, {
+            params: {
+                'invites': invites,
+            }
+        }).catch((err) => { console.log(err) })
     }
 
     const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
@@ -121,11 +123,32 @@ function Bidding({ updatePercents }) {
         const endDate = new Date(restProps.data.endDate)
         const [percents, setPercents] = useState(restProps.data.percents);
 
-        const handleChangeMultiple = (selectedList) => {
-            const newInvites = invites.map((item, index) => index === restProps.data.id ? selectedList : item)
+        const handlePercentsChange = (value) => {
+            let sum = 0
+            const newAppointments = appointments.map((item) => {
+                if (restProps.data.id === item.id) {
+                    sum += value;
+                    return {
+                        ...item,
+                        percents: value
+                    }
+                }
 
-            setInvites(newInvites);
-        };
+                sum += item.percents;
+
+                return item
+            })
+
+            if (sum <= 100) {
+                setPercents(parseInt(value))
+                setAppointments(newAppointments)
+            } else {
+                setAlert(true)
+                setTimeout(() => {
+                    setAlert(false)
+                }, 3000)
+            }
+        }
 
         return (
             <Appointments.AppointmentContent  {...restProps}>
@@ -133,34 +156,31 @@ function Bidding({ updatePercents }) {
                     <div data-testid="biddingCalendar">
                         {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
                             + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
-                    <Select data-testid="inviteFriend"
-                        mode="multiple"
-                        allowClear
-                        showSearch
-                        style={{ width: '100%' }}
-                        placeholder="Invite a friend"
-                        onChange={handleChangeMultiple}
+                    <Form.Item name={['invites', restProps.data.id - 1]}>
+                        <Select
+                            data-testid="inviteFriend"
+                            mode="multiple"
+                            allowClear
+                            showSearch
+                            style={{ width: '100%' }}
+                            placeholder="Invite a friend"
 
-                        filterOption={(input, option) => {
-                            return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                        }}
-                    >
-                        {employees.map((emp, i) => (
-                            <Option key={i} value={emp._username}>{emp._name}</Option>
-                        ))}
-                    </Select>
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <TextField data-testid="percentsSlots"
-                            type="number"
-                            size="small"
-                            label="Percents"
-                            className={classes.percent}
-                            value={percents}
-                            onChange={(ev) => {
-                                setPercents(parseInt(ev.target.value))
-                            }
-                            } />
-                    </div>
+                            filterOption={(input, option) => {
+                                return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                            }}
+                        >
+                            {employees.map((emp, i) => (
+                                <Option key={i} value={emp.username}>{emp.name}</Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                        <InputNumber
+                            data-testid="percentsSlots"
+                            // className={classes.percent}
+                            defaultValue={percents}
+                            onChange={handlePercentsChange} />
+                    </Form.Item>
                 </div>
             </Appointments.AppointmentContent >
         );
@@ -168,48 +188,55 @@ function Bidding({ updatePercents }) {
 
     return (
         <div >
-            <Paper dir={'ltr'}>
-                {showAlert &&
-                    <div className={classes.alert}>
-                        <Alert className={classes.innerMessage} severity="warning">
-                            <AlertTitle>Notice</AlertTitle>
-                    You must fill 100%
-                </Alert>
-                    </div>
-                }
-                <Scheduler
-                    data={appointments}
-                // height={650}
-                >
-                    <ViewState
-                        defaultCurrentDate={sunday}
-                    />
-                    <WeekView
-                        startDayHour={8}
-                        endDayHour={19}
-
-                        excludedDays={[7, 6]}
-                        timeTableCellComponent={TimeTableCell}
-                        cellDuration={60}
-                    />
-
-                    <Appointments
-                        appointmentContentComponent={BiddingSlot}
-                    />
-                </Scheduler>
-            </Paper>
-            <Button data-testid="saveBiddingBtn"
-                type='primary'
-                shape='round'
-                size='large'
-                style={{ position: 'fixed', bottom: '12vh', left: 'calc(100% - 200px)' }}
-                icon={<SaveOutlined />}
-                onClick={() => {
+            <Form
+                form={form}
+                onFinish={({ invites }) => {
                     updateAppointmentsOnServer();
                     sendInvites(invites);
-                }}>
-                Save Biddings
-            </Button>
+                }}
+            >
+                <Paper dir={'ltr'}>
+                    {showAlert &&
+                        <div className={classes.alert}>
+                            <Alert className={classes.innerMessage} severity="warning">
+                                <AlertTitle>Notice</AlertTitle>
+                    You must fill 100%
+                </Alert>
+                        </div>
+                    }
+                    <Scheduler
+                        data={appointments}
+                    // height={650}
+                    >
+                        <ViewState
+                            defaultCurrentDate={sunday}
+                        />
+                        <WeekView
+                            startDayHour={8}
+                            endDayHour={19}
+
+                            excludedDays={[7, 6]}
+                            timeTableCellComponent={TimeTableCell}
+                            cellDuration={60}
+                        />
+
+                        <Appointments
+                            appointmentContentComponent={BiddingSlot}
+                        />
+                    </Scheduler>
+                </Paper>
+                <Button
+                    data-testid="saveBiddingBtn"
+                    type='primary'
+                    shape='round'
+                    size='large'
+                    htmlType='submit'
+                    style={{ position: 'fixed', bottom: '12vh', left: 'calc(100% - 200px)' }}
+                    icon={<SaveOutlined />}
+                >
+                    Save Biddings
+                </Button>
+            </Form>
         </div>
     )
 }
