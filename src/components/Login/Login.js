@@ -28,7 +28,7 @@ function Login({ onLogin }) {
             }).then(({data}) => {
                 Axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`
                 localStorage.setItem('auth', `Bearer ${data.token}`)
-                onLogin({ username, isManager: true })
+                onLogin();
                 history.replace("home");
             }).catch((err)=> console.log(err))
         }

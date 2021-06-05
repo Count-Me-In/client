@@ -72,7 +72,7 @@ function Bidding({ updatePercents }) {
     //update appointments on first upload and on every change
     const updateAppointments = (data) => {
         const newAppontments = appointments.map((appointment) => {
-            appointment.percents = data[appointment.id - 1]._percentage;
+            appointment.percents = data[appointment.id - 1].percentage;
             return appointment;
         })
         setAppointments(newAppontments)
@@ -85,31 +85,28 @@ function Bidding({ updatePercents }) {
         updatePercents(sum)
     }
 
-    const updateAppointmentsOnServer = (newAppointments) => {
+    const updateAppointmentsOnServer = () => {
         //first - update original bids object
-        console.log(newAppointments)
         var new_origin = originalBidsObj
-        for (var i = 0; i < newAppointments.length; i++) {
-            new_origin[i]['_percentage'] = newAppointments[i]['percents']
-            console.log(typeof(newAppointments[i]['percents']))
+        console.log(new_origin);
+        console.log(appointments);
+        for (var i = 0; i < new_origin.length; i++) {
+            new_origin[i]['percentage'] = appointments[new_origin[i]['day'] - 1]['percents'];
         }
 
-        
-        setoriginalBidsObj(new_origin)
-        console.log(originalBidsObj)
-        Axios.put(`${API_URL}/employees/updateBids`, {}, {
-            params: {
-                'bids': originalBidsObj,
-            }
-        }).catch((err) => { console.log(err) })
+        Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
+        .then((response)=>{
+            setoriginalBidsObj(new_origin);
+        })
+        .catch((err) => { console.log(err) })
     }
 
     const sendInvites = () => {
-        Axios.put(`${API_URL}/employees/invites`, {}, {
-            params: {
-                'invites': invites,
-            }
-        }).catch((err) => { console.log(err) })
+        // Axios.put(`${API_URL}/employees/invites`, {}, {
+        //     params: {
+        //         'invites': invites,
+        //     }
+        // }).catch((err) => { console.log(err) })
     }
 
     const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
@@ -208,7 +205,7 @@ function Bidding({ updatePercents }) {
                 style={{ position: 'fixed', bottom: '12vh', left: 'calc(100% - 200px)' }}
                 icon={<SaveOutlined />}
                 onClick={() => {
-                    updateAppointmentsOnServer(appointments); //TODO: CHECK THIS
+                    updateAppointmentsOnServer();
                     sendInvites(invites);
                 }}>
                 Save Biddings

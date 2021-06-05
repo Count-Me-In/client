@@ -5,61 +5,15 @@ import DaysCheckBox from '../DaysCheckBox/DaysCheckBox';
 import Axios from 'axios';
 import { API_URL, TOKEN } from '../../Config/config';
 
-const employees = [
-    {
-        name: "Shenhav",
-        restrictions: [
-            true,
-            true,
-            true,
-            true,
-            true
-        ]
-    },
-    {
-        name: "Noy",
-        restrictions: [
-            true,
-            false,
-            true,
-            false,
-            false
-        ]
-    },
-    {
-        name: "Nufar",
-        restrictions: [
-            true,
-            false,
-            false,
-            false,
-            true
-        ]
-    },
-    {
-        name: "Shauli",
-        restrictions: [
-            false,
-            false,
-            false,
-            false,
-            false
-        ]
-    }
-];
-
 
 function Restrictions() {
     const [empRestrictions, updateRestrictions] = useState([])
     const [employee, selectEmployee] = useState({});
 
-
-
-
     const createAllowedArr = (allowedDays) => {
         var allowed = [false, false, false, false, false]
         for (var i = 0; i < allowedDays.length; i++) {
-            var day = allowedDays[i]
+            var day = allowedDays[i] - 1
             if (day >= 0 && day < 5) {
                 allowed[day] = true
             }
@@ -95,15 +49,14 @@ function Restrictions() {
         var allowed = []
         for(var i = 0; i < restrictions.length; i++){
             if(restrictions[i]){
-                allowed.push(i)
+                allowed.push(i + 1);
             }
         }
         console.log(allowed)
         console.log(name)
 
-        Axios.put(`${API_URL}/managers/setRestrictions`, {}, {
+        Axios.post(`${API_URL}/managers/setRestrictions`, {'_allowed_days': allowed}, {
             params: {
-                'restriction': {'_allowed_days': allowed},
                 'employee_username': name,
             }
         }).then(() => {
@@ -129,7 +82,7 @@ function Restrictions() {
             <h1 className={classes.header}>Day Restrictions</h1>
             <div className={classes.empBox}>
                 <RadioGroup aria-label="employee" name="employees" value={(Object.keys(employee).length != 0)?employee.name:''} onChange={handleChange}>
-                    {employees.map((emp) => <FormControlLabel value={emp.name} control={<Radio />} label={emp.name} />
+                    {empRestrictions.map((emp) => <FormControlLabel value={emp.name} control={<Radio />} label={emp.name} />
                     )}
                 </RadioGroup>
             </div>
