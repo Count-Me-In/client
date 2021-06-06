@@ -3,9 +3,12 @@ import classes from './ManageEmployeePoints.module.css'
 import { Button, TextField } from '@material-ui/core';
 import EmployeePoints from './EmployeePoints/EmployeePoints';
 import Axios from 'axios';
-import { API_URL, TOKEN } from '../../Config/config';
+import { API_URL } from '../../Config/config';
+import { Alert, AlertTitle } from '@material-ui/lab';
 
 function ManageEmployeePoints() {
+    const [passedPointsLimit, setPassedPointsLimit] = useState(false);
+    const [pointsUpdatedSuccessfuly, setPointsUpdatedSuccessfuly] = useState(false);
     const [totalPoints, setTotalPoints] = useState(0);
     const [leftToSplit, setPointsLeft] = useState(0);
     const [employees, updateEmpPoints] = useState([])
@@ -26,6 +29,10 @@ function ManageEmployeePoints() {
         const sum = updatedEmp.reduce((lastPoints, emp) => emp.points + lastPoints, 0)
 
         if (sum > totalPoints) {
+            setPassedPointsLimit(true);
+            setTimeout(() => {
+                setPassedPointsLimit(false)
+            }, 3000);
             return false;
         }
 
@@ -35,30 +42,41 @@ function ManageEmployeePoints() {
     }
 
     function updatePoints() {
-
         var employeesPoints = {};
         employees.forEach(element => {
             employeesPoints[element.username] = element.points
         })
-        console.log(employees)
-        console.log(employeesPoints)
+
         Axios.post(`${API_URL}/managers/setEmployeePoints`, employeesPoints
         ).then(() => {
-            alert('Points update succesfully')
+            setPointsUpdatedSuccessfuly(true);
+            setTimeout(() => {
+                setPointsUpdatedSuccessfuly(false)
+            }, 3000);
         })
     }
 
     return (
         <div className={classes.container}>
-            <h1 className={classes.header}>Manage Employees Points</h1>
+            <h1 className={classes.header}><b>Manage Employees Points</b></h1>
             <div className={classes.empBox}>
                 {employees.map((emp) => <EmployeePoints onPointsChanged={handlePointsChange} username={emp.username} name={emp.name} points={emp.points}></EmployeePoints>)}
             </div>
+            <h1 className={classes.totalPoints}>Points left to split: {leftToSplit}/{totalPoints}</h1>
             <Button onClick={updatePoints} style={{ width: 'fit-content', margin: '5px' }} variant="contained" color="primary">
                 Update points
             </Button>
-            <h1 className={classes.totalPoints}>Points left to split: {leftToSplit}/{totalPoints}</h1>
-        </div>)
+            {pointsUpdatedSuccessfuly &&
+                <Alert severity="success">Points updated successfuly</Alert>
+            }
+            {passedPointsLimit &&
+                <Alert severity="error">
+                        <AlertTitle>Error</AlertTitle>
+                        You have reached your points limit!
+                </Alert>           
+            }
+        </div>
+    )
 }
 
 export default ManageEmployeePoints;

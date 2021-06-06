@@ -4,7 +4,6 @@ import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
-// import classes from './DaysCheckBox.module.css'
 
 const mapIndexToDayString = ((index) => {
     const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"]

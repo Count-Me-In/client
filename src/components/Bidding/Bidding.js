@@ -2,18 +2,13 @@ import React, { useState, useEffect } from 'react';
 import classes from './Bidding.module.css';
 import Paper from '@material-ui/core/Paper';
 import { Alert, AlertTitle } from '@material-ui/lab';
-import {
-    Scheduler,
-    WeekView,
-    Appointments,
-    Toolbar,
-} from '@devexpress/dx-react-scheduler-material-ui';
+import { Scheduler, WeekView, Appointments } from '@devexpress/dx-react-scheduler-material-ui';
 import { Button, Form, Input, InputNumber, Select } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 import SaveIcon from '@material-ui/icons/Save';
 import { ViewState } from '@devexpress/dx-react-scheduler';
 import Axios from 'axios';
-import { API_URL, TOKEN } from '../../Config/config';
+import { API_URL } from '../../Config/config';
 const { Option } = Select;
 
 const getNextSunday = () => {
@@ -26,6 +21,8 @@ const getNextSunday = () => {
 }
 
 function Bidding({ updatePercents }) {
+    const[somthingWentWrongAlert, setsomthingWentWrongAlert] = React.useState(false);
+    const[bidsSavedSuccessfuly, setBidsSavedSuccessfuly] = React.useState(false);
     const [form] = Form.useForm();
 
     let sunday = getNextSunday();
@@ -58,7 +55,6 @@ function Bidding({ updatePercents }) {
     //triggered onpage load
     useEffect(() => {
         Axios.get(`${API_URL}/employees/all`).then(({ data: employees }) => {
-
             if (employees?.length > 0) {
                 setEmployees(employees)
             }
@@ -80,7 +76,7 @@ function Bidding({ updatePercents }) {
         setAppointments(newAppointments)
         setoriginalBidsObj(data)
 
-        let sum = 0;//TODO: need this?
+        let sum = 0;
         appointments.forEach((appointment) => {
             sum += appointment.percents;
         })
@@ -88,19 +84,30 @@ function Bidding({ updatePercents }) {
     }
 
     const updateAppointmentsOnServer = () => {
+        
         //first - update original bids object
         var new_origin = originalBidsObj
-        console.log(new_origin);
-        console.log(appointments);
         for (var i = 0; i < new_origin.length; i++) {
             new_origin[i]['percentage'] = appointments[new_origin[i]['day'] - 1]['percents'];
         }
 
         Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
-            .then((response) => {
-                setoriginalBidsObj(new_origin);
-            })
-            .catch((err) => { console.log(err) })
+        .then((response) => {
+            setoriginalBidsObj(new_origin);
+            console.log("update success")
+            setBidsSavedSuccessfuly(true);
+            setTimeout(() => {
+                setBidsSavedSuccessfuly(false)
+            }, 3000);
+        })
+        .catch((err) => { 
+            console.log(err)
+            console.log("update error") 
+            setsomthingWentWrongAlert(true)
+            setTimeout(() => {
+                setsomthingWentWrongAlert(false)
+            }, 3000);
+        })
     }
 
     const sendInvites = (invites) => {
@@ -131,9 +138,7 @@ function Bidding({ updatePercents }) {
                         percents: value
                     }
                 }
-
                 sum += item.percents;
-
                 return item
             })
 
@@ -152,8 +157,8 @@ function Bidding({ updatePercents }) {
             <Appointments.AppointmentContent  {...restProps}>
                 <div className={classes.container} data-testid="biddingSlots">
                     <div data-testid="biddingCalendar">
-                        {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
-                            + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
+                    {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
+                        + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
                     <Form.Item name={['invites', restProps.data.id - 1]}>
                         <Select
                             data-testid="inviteFriend"
@@ -162,21 +167,18 @@ function Bidding({ updatePercents }) {
                             showSearch
                             style={{ width: '100%' }}
                             placeholder="Invite a friend"
-
-
                             filterOption={(input, option) => {
                                 return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                             }}
                         >
                             {employees.map((emp, i) => (
                                 <Option key={i} value={emp.username}>{emp.name}</Option>
-                            ))}
+                            ))} 
                         </Select>
                     </Form.Item>
                     <Form.Item label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         <InputNumber
                             data-testid="percentsSlots"
-                            // className={classes.percent}
                             defaultValue={percents}
                             onChange={handlePercentsChange} />
                     </Form.Item>
@@ -195,35 +197,27 @@ function Bidding({ updatePercents }) {
                 }}
             >
                 <Paper dir={'ltr'}>
-                    {showAlert &&
-                        <div className={classes.alert}>
-                            <Alert className={classes.innerMessage} severity="warning">
-                                <AlertTitle>Notice</AlertTitle>
-                    You must fill 100%
-                </Alert>
-                        </div>
-                    }
-                    <Scheduler
-                        data={appointments}
-                    // height={650}
-                    >
-                        <ViewState
-                            defaultCurrentDate={sunday}
-                        />
+                    <Scheduler data={appointments}>
+                        <ViewState defaultCurrentDate={sunday} />
                         <WeekView
                             startDayHour={8}
                             endDayHour={19}
-
                             excludedDays={[7, 6]}
                             timeTableCellComponent={TimeTableCell}
                             cellDuration={60}
                         />
-
-                        <Appointments
-                            appointmentContentComponent={BiddingSlot}
-                        />
+                        <Appointments appointmentContentComponent={BiddingSlot} />
                     </Scheduler>
                 </Paper>
+                {somthingWentWrongAlert &&
+                    <Alert severity="error">
+                        <AlertTitle>Error</AlertTitle>
+                        Somthing went wrong! Please try again.
+                    </Alert>
+                }
+                {bidsSavedSuccessfuly && 
+                    <Alert severity="success">Bids updated successfuly</Alert>
+                }
                 <Button
                     data-testid="saveBiddingBtn"
                     type='primary'
