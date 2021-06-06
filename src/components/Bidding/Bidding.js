@@ -43,11 +43,11 @@ function Bidding({ updatePercents }) {
     }
 
     const schedulerData = [
-        { id: 1, startDate: sunday.toISOString(), endDate: getEndDate(sunday).toISOString(), percents: 0 },
-        { id: 2, startDate: monday.toISOString(), endDate: getEndDate(monday).toISOString(), percents: 0 },
-        { id: 3, startDate: tuesday.toISOString(), endDate: getEndDate(tuesday).toISOString(), percents: 0 },
-        { id: 4, startDate: wednesday.toISOString(), endDate: getEndDate(wednesday).toISOString(), percents: 0 },
-        { id: 5, startDate: thursday.toISOString(), endDate: getEndDate(thursday).toISOString(), percents: 0 },
+        { id: 0, startDate: sunday.toISOString(), endDate: getEndDate(sunday).toISOString(), percents: 0 },
+        { id: 1, startDate: monday.toISOString(), endDate: getEndDate(monday).toISOString(), percents: 0 },
+        { id: 2, startDate: tuesday.toISOString(), endDate: getEndDate(tuesday).toISOString(), percents: 0 },
+        { id: 3, startDate: wednesday.toISOString(), endDate: getEndDate(wednesday).toISOString(), percents: 0 },
+        { id: 4, startDate: thursday.toISOString(), endDate: getEndDate(thursday).toISOString(), percents: 0 },
     ]
 
     const [appointments, setAppointments] = useState(schedulerData);
@@ -66,35 +66,34 @@ function Bidding({ updatePercents }) {
 
         Axios.get(`${API_URL}/employees/bids_collection`).then(({ data: BidCollection }) => {
             if (BidCollection.length === 5) {
-                updateAppointments(BidCollection)
+                form.setFieldsValue({ 'bids': BidCollection.map((item) => item.percentage) })
+                setoriginalBidsObj(BidCollection)
+
+                let sum = 0;//TODO: need this?
+                BidCollection.forEach((item) => {
+                    sum += item.percentage;
+                })
+                updatePercents(sum)
+                // updateAppointments(BidCollection)
             }
         }).catch((err) => console.log(err))
     }, []);
 
-    //update appointments on first upload and on every change
-    const updateAppointments = (data) => {
-        const newAppointments = appointments.map((appointment) => {
-            appointment.percents = data[appointment.id - 1].percentage;
-            return appointment;
-        })
-        setAppointments(newAppointments)
-        setoriginalBidsObj(data)
-
-        let sum = 0;//TODO: need this?
-        appointments.forEach((appointment) => {
-            sum += appointment.percents;
-        })
-        updatePercents(sum)
+    const sendInvites = (invites) => {
+        console.log(invites)
+        Axios.post(`${API_URL}/employees/invites`, invites, {})
+            .catch((err) => { console.log(err) })
     }
 
-    const updateAppointmentsOnServer = () => {
+    const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
+    updatePercents(totalPercents)
+
+    const updateAppointmentsOnServer = (bids) => {
         //first - update original bids object
-        var new_origin = originalBidsObj
-        console.log(new_origin);
-        console.log(appointments);
-        for (var i = 0; i < new_origin.length; i++) {
-            new_origin[i]['percentage'] = appointments[new_origin[i]['day'] - 1]['percents'];
-        }
+        const new_origin = originalBidsObj.map((item) => ({
+            ...item,
+            percentage: item.percentage
+        }))
 
         Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
             .then((response) => {
@@ -103,15 +102,6 @@ function Bidding({ updatePercents }) {
             .catch((err) => { console.log(err) })
     }
 
-    const sendInvites = (invites) => {
-        console.log(invites)
-        Axios.post(`${API_URL}/employees/invites`, invites, {})
-        .catch((err) => { console.log(err) })
-    }
-
-    const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
-    updatePercents(totalPercents)
-
     const TimeTableCell = ({ onDoubleClick, ...restProps }) => {
         return <WeekView.TimeTableCell onDoubleClick={undefined} {...restProps} />;
     };
@@ -119,33 +109,25 @@ function Bidding({ updatePercents }) {
     const BiddingSlot = ({ style, ...restProps }) => {
         const startDate = new Date(restProps.data.startDate)
         const endDate = new Date(restProps.data.endDate)
-        const [percents, setPercents] = useState(restProps.data.percents);
+        const [percents, setPercents] = useState(form.getFieldValue('bids')[restProps.data.id])
+        // const defaultPercents = form.getFieldValue('bids')[restProps.data.id]
 
-        const handlePercentsChange = (value) => {
-            let sum = 0
-            const newAppointments = appointments.map((item) => {
-                if (restProps.data.id === item.id) {
-                    sum += value;
-                    return {
-                        ...item,
-                        percents: value
-                    }
-                }
+        const handlePercentsChange = (value, prevValue) => {
+            const bids = form.getFieldValue('bids');
+            let sum = form.getFieldValue('bids').reduce((accum, item, index) => {
+                return index === restProps.data.id ? accum + value : accum + item;
+            }, 0)
 
-                sum += item.percents;
-
-                return item
-            })
-
-            if (sum <= 100) {
-                setPercents(parseInt(value))
-                setAppointments(newAppointments)
-            } else {
+            if (sum > 100) {
                 setAlert(true)
                 setTimeout(() => {
                     setAlert(false)
                 }, 3000)
+
+                return prevValue
             }
+
+            return value
         }
 
         return (
@@ -154,7 +136,7 @@ function Bidding({ updatePercents }) {
                     <div data-testid="biddingCalendar">
                         {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
                             + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
-                    <Form.Item name={['invites', restProps.data.id - 1]}>
+                    <Form.Item name={['invites', restProps.data.id]}>
                         <Select
                             data-testid="inviteFriend"
                             mode="multiple"
@@ -173,24 +155,30 @@ function Bidding({ updatePercents }) {
                             ))}
                         </Select>
                     </Form.Item>
-                    <Form.Item label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <Form.Item normalize={handlePercentsChange} label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         <InputNumber
+                            // value={percents}
+                            // onChange={handlePercentsChange}
                             data-testid="percentsSlots"
-                            // className={classes.percent}
-                            defaultValue={percents}
-                            onChange={handlePercentsChange} />
+                        // className={classes.percent}
+                        // defaultValue={defaultPercents}
+                        />
                     </Form.Item>
                 </div>
-            </Appointments.AppointmentContent >
+            </Appointments.AppointmentContent>
         );
     };
 
     return (
         <div >
             <Form
+                initialValues={{
+                    bids: [0, 0, 0, 0, 0]
+                }
+                }
                 form={form}
-                onFinish={({ invites }) => {
-                    updateAppointmentsOnServer();
+                onFinish={({ invites, bids }) => {
+                    updateAppointmentsOnServer(bids);
                     sendInvites(invites);
                 }}
             >
