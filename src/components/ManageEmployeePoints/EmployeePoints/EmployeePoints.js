@@ -3,7 +3,7 @@ import { TextField } from '@material-ui/core';
 import classes from './EmployeePoints.module.css'
 import { width } from '@material-ui/system';
 
-function EmployeePoints({name, points,onPointsChanged}) {
+function EmployeePoints({name, points, username, onPointsChanged}) {
     const [empPoints, setPoints] = useState(points);
 
 
@@ -15,7 +15,7 @@ function EmployeePoints({name, points,onPointsChanged}) {
                 value={empPoints}
                 type='number'
                 onChange={(ev) => {
-                    if (onPointsChanged(name, ev.target.value)) {
+                    if (onPointsChanged(username, ev.target.value)) {
                         setPoints(ev.target.value)
                     } else {
                         alert("You have reached your total points");

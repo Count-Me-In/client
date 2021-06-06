@@ -14,14 +14,7 @@ function ManageEmployeePoints() {
         Promise.all([Axios.get(`${API_URL}/managers/getTotalPoints`), Axios.get(`${API_URL}/managers/getEmployeesPoints`)])
             .then(([totalPointsData, epmPointsData]) => {
                 setTotalPoints(totalPointsData.data);
-                var id = 1;
-                var result = Array()
-                for (const [key, value] of Object.entries(epmPointsData.data)) {
-                    result.push({ id: id, name: key, points: value })
-                    id++
-                }
-
-
+                const result = epmPointsData.data.map(value => ({ name: value['name'], username: value['username'], points: value['points'] }));
                 const sum = result.reduce((lastPoints, emp) => emp.points + lastPoints, 0)
                 updateEmpPoints(result)
                 setPointsLeft(totalPointsData.data - sum)
@@ -29,7 +22,7 @@ function ManageEmployeePoints() {
     }, []);
 
     function handlePointsChange(empName, points) {
-        const updatedEmp = employees.map((emp) => emp.name === empName ? { ...emp, points: parseInt(points) } : emp)
+        const updatedEmp = employees.map((emp) => emp.username === empName ? { ...emp, points: parseInt(points) } : emp)
         const sum = updatedEmp.reduce((lastPoints, emp) => emp.points + lastPoints, 0)
 
         if (sum > totalPoints) {
@@ -43,12 +36,9 @@ function ManageEmployeePoints() {
 
     function updatePoints() {
 
-        // const employeesPoints = {}
-        const employeesPoints = employees.map(element => {
-            return {
-                name: element.name,
-                points: element.points
-            }
+        var employeesPoints = {};
+        employees.forEach(element => {
+            employeesPoints[element.username] = element.points
         })
         console.log(employees)
         console.log(employeesPoints)
@@ -62,7 +52,7 @@ function ManageEmployeePoints() {
         <div className={classes.container}>
             <h1 className={classes.header}>Manage Employees Points</h1>
             <div className={classes.empBox}>
-                {employees.map((emp) => <EmployeePoints onPointsChanged={handlePointsChange} key={emp.id} name={emp.name} points={emp.points}></EmployeePoints>)}
+                {employees.map((emp) => <EmployeePoints onPointsChanged={handlePointsChange} username={emp.username} name={emp.name} points={emp.points}></EmployeePoints>)}
             </div>
             <Button onClick={updatePoints} style={{ width: 'fit-content', margin: '5px' }} variant="contained" color="primary">
                 Update points

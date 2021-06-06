@@ -27,13 +27,13 @@ function Restrictions() {
         Axios.get(`${API_URL}/managers/getEmployeesRestrictions`).then(({ data }) => {
             console.log(data)
             var restrictions = []
-            for (const [key, value] of Object.entries(data)) {
-                restrictions.push({ name: key, restrictions: createAllowedArr(value['_allowed_days'])})
+            for (const value of data) {
+                restrictions.push({ name: value['name'], username: value['username'], restrictions: createAllowedArr(value['restriction']['_allowed_days'])})
             }
             updateRestrictions(restrictions)
             console.log(empRestrictions)
             if (empRestrictions.length > 0) {
-                selectEmployee(empRestrictions[0])
+                selectEmployee(empRestrictions[0].username)
             }
         }).catch((err) => console.log(err))
     }, []);
@@ -41,11 +41,8 @@ function Restrictions() {
 
     const updateUserRestrictions = (restrictions) => {
         console.log("inside updateUserRest")
-        const newEmpRestriction = empRestrictions.map((emp) => emp.name !== employee.name ? emp : { name: emp.name, restrictions });
-        const updatedEmployee = newEmpRestriction.find((emp) => emp.name === employee.name)
+        const newEmpRestriction = empRestrictions.map((emp) => emp.username !== employee.username ? emp : { ...emp, restrictions });
 
-
-        const name = updatedEmployee.name
         var allowed = []
         for(var i = 0; i < restrictions.length; i++){
             if(restrictions[i]){
@@ -53,27 +50,21 @@ function Restrictions() {
             }
         }
         console.log(allowed)
-        console.log(name)
 
         Axios.post(`${API_URL}/managers/setRestrictions`, {'_allowed_days': allowed}, {
             params: {
-                'employee_username': name,
+                'employee_username': employee.username,
             }
         }).then(() => {
             updateRestrictions(newEmpRestriction);
-            selectEmployee(updatedEmployee);
-        }).
-        catch((err) => { console.log(err) })
+            selectEmployee(newEmpRestriction.find(emp => employee.username === emp.username));
+        }).catch((err) => { console.log(err) })
 
         
     }
 
     const handleChange = (event) => {
-        console.log(empRestrictions)
-        console.log(typeof(empRestrictions))
-        console.log(event.target.value)
-        const employee = empRestrictions.find((emp) => emp.name === event.target.value)
-        selectEmployee(employee);
+        selectEmployee(empRestrictions.find(emp=>emp.username === event.target.value));
     };
 
 
@@ -81,13 +72,13 @@ function Restrictions() {
         <div>
             <h1 className={classes.header}>Day Restrictions</h1>
             <div className={classes.empBox}>
-                <RadioGroup aria-label="employee" name="employees" value={(Object.keys(employee).length != 0)?employee.name:''} onChange={handleChange}>
-                    {empRestrictions.map((emp) => <FormControlLabel value={emp.name} control={<Radio />} label={emp.name} />
+                <RadioGroup aria-label="employee" name="employees" value={(Object.keys(employee).length !== 0)?employee.username:''} onChange={handleChange}>
+                    {empRestrictions.map((emp) => <FormControlLabel value={emp.username} control={<Radio />} label={emp.name} />
                     )}
                 </RadioGroup>
             </div>
             <div className={classes.empBox}>
-                <DaysCheckBox className={classes.restrictions} updateUserRestrictions={updateUserRestrictions} restrictions={(Object.keys(employee).length != 0)?employee.restrictions:[]} />
+                <DaysCheckBox className={classes.restrictions} updateUserRestrictions={updateUserRestrictions} restrictions={(Object.keys(employee).length !== 0)?employee.restrictions:[]} />
             </div>
         </div>)
 }
