@@ -5,7 +5,6 @@ import DaysCheckBox from '../DaysCheckBox/DaysCheckBox';
 import Axios from 'axios';
 import { API_URL, TOKEN } from '../../Config/config';
 
-
 function Restrictions() {
     const [empRestrictions, updateRestrictions] = useState([])
     const [employee, selectEmployee] = useState({});
@@ -38,9 +37,7 @@ function Restrictions() {
         }).catch((err) => console.log(err))
     }, []);
 
-
     const updateUserRestrictions = (restrictions) => {
-        console.log("inside updateUserRest")
         const newEmpRestriction = empRestrictions.map((emp) => emp.username !== employee.username ? emp : { ...emp, restrictions });
 
         var allowed = []
@@ -49,7 +46,6 @@ function Restrictions() {
                 allowed.push(i + 1);
             }
         }
-        console.log(allowed)
 
         Axios.post(`${API_URL}/managers/setRestrictions`, {'_allowed_days': allowed}, {
             params: {
@@ -59,18 +55,15 @@ function Restrictions() {
             updateRestrictions(newEmpRestriction);
             selectEmployee(newEmpRestriction.find(emp => employee.username === emp.username));
         }).catch((err) => { console.log(err) })
-
-        
     }
 
     const handleChange = (event) => {
         selectEmployee(empRestrictions.find(emp=>emp.username === event.target.value));
     };
 
-
     return (
-        <div>
-            <h1 className={classes.header}>Day Restrictions</h1>
+        <div className={classes.container}>
+            <h1 className={classes.header}><b>Days Restrictions</b></h1>
             <div className={classes.empBox}>
                 <RadioGroup aria-label="employee" name="employees" value={(Object.keys(employee).length !== 0)?employee.username:''} onChange={handleChange}>
                     {empRestrictions.map((emp) => <FormControlLabel value={emp.username} control={<Radio />} label={emp.name} />
@@ -80,7 +73,8 @@ function Restrictions() {
             <div className={classes.empBox}>
                 <DaysCheckBox className={classes.restrictions} updateUserRestrictions={updateUserRestrictions} restrictions={(Object.keys(employee).length !== 0)?employee.restrictions:[]} />
             </div>
-        </div>)
+        </div>
+    )
 }
 
 export default Restrictions;

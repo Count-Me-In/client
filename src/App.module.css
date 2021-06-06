@@ -1,13 +1,8 @@
-.header {
-  margin-bottom: 20px;
-}
-
 .navbar {
-  /* background-color: #4d79ff; */
+  /* background-color: orange;  */
   flex-direction: row;
   align-items: center;
   align-content: center;
-
 }
 
 .navbarChild {
