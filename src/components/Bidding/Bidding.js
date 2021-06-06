@@ -24,6 +24,7 @@ function Bidding({ updatePercents }) {
     const[somthingWentWrongAlert, setsomthingWentWrongAlert] = React.useState(false);
     const[bidsSavedSuccessfuly, setBidsSavedSuccessfuly] = React.useState(false);
     const [form] = Form.useForm();
+    const [allowedDays, setallowedDays] = React.useState([]);
 
     let sunday = getNextSunday();
     const tempDate = new Date(sunday);
@@ -64,6 +65,10 @@ function Bidding({ updatePercents }) {
             if (BidCollection.length === 5) {
                 updateAppointments(BidCollection)
             }
+        }).catch((err) => console.log(err))
+
+        Axios.get(`${API_URL}/employees/getEmployeesRestriction`).then(({ data: restriction }) => {
+            setallowedDays(restriction._allowed_days)
         }).catch((err) => console.log(err))
     }, []);
 
@@ -126,7 +131,16 @@ function Bidding({ updatePercents }) {
     const BiddingSlot = ({ style, ...restProps }) => {
         const startDate = new Date(restProps.data.startDate)
         const endDate = new Date(restProps.data.endDate)
-        const [percents, setPercents] = useState(restProps.data.percents);
+        const [percents, setPercents] = React.useState(restProps.data.percents);
+
+        if (!allowedDays.includes(restProps.data.id)) {
+            return (
+            <Appointments.AppointmentContent {...restProps}>
+                <div>
+                    Restricted Day
+                </div>
+            </Appointments.AppointmentContent>);
+        }
 
         const handlePercentsChange = (value) => {
             let sum = 0
@@ -154,7 +168,7 @@ function Bidding({ updatePercents }) {
         }
 
         return (
-            <Appointments.AppointmentContent  {...restProps}>
+            <Appointments.AppointmentContent {...restProps}>
                 <div className={classes.container} data-testid="biddingSlots">
                     <div data-testid="biddingCalendar">
                     {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
