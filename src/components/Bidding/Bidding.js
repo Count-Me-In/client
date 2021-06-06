@@ -21,8 +21,8 @@ const getNextSunday = () => {
 }
 
 function Bidding({ updatePercents }) {
-    const[somthingWentWrongAlert, setsomthingWentWrongAlert] = React.useState(false);
-    const[bidsSavedSuccessfuly, setBidsSavedSuccessfuly] = React.useState(false);
+    const [somthingWentWrongAlert, setsomthingWentWrongAlert] = React.useState(false);
+    const [bidsSavedSuccessfuly, setBidsSavedSuccessfuly] = React.useState(false);
     const [form] = Form.useForm();
 
     let sunday = getNextSunday();
@@ -92,22 +92,22 @@ function Bidding({ updatePercents }) {
         }))
 
         Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
-        .then((response) => {
-            setoriginalBidsObj(new_origin);
-            console.log("update success")
-            setBidsSavedSuccessfuly(true);
-            setTimeout(() => {
-                setBidsSavedSuccessfuly(false)
-            }, 3000);
-        })
-        .catch((err) => { 
-            console.log(err)
-            console.log("update error") 
-            setsomthingWentWrongAlert(true)
-            setTimeout(() => {
-                setsomthingWentWrongAlert(false)
-            }, 3000);
-        })
+            .then((response) => {
+                setoriginalBidsObj(new_origin);
+                console.log("update success")
+                setBidsSavedSuccessfuly(true);
+                setTimeout(() => {
+                    setBidsSavedSuccessfuly(false)
+                }, 3000);
+            })
+            .catch((err) => {
+                console.log(err)
+                console.log("update error")
+                setsomthingWentWrongAlert(true)
+                setTimeout(() => {
+                    setsomthingWentWrongAlert(false)
+                }, 3000);
+            })
     }
 
     const TimeTableCell = ({ onDoubleClick, ...restProps }) => {
@@ -156,7 +156,7 @@ function Bidding({ updatePercents }) {
                         >
                             {employees.map((emp, i) => (
                                 <Option key={i} value={emp.username}>{emp.name}</Option>
-                            ))} 
+                            ))}
                         </Select>
                     </Form.Item>
                     <Form.Item normalize={handlePercentsChange} label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -183,6 +183,14 @@ function Bidding({ updatePercents }) {
                 }}
             >
                 <Paper dir={'ltr'}>
+                    {showAlert &&
+                        <div className={classes.alert}>
+                            <Alert className={classes.innerMessage} severity="warning">
+                                <AlertTitle>Notice</AlertTitle>
+                                You must fill 100%
+                            </Alert>
+                        </div>
+                    }
                     <Scheduler data={appointments}>
                         <ViewState defaultCurrentDate={sunday} />
                         <WeekView
@@ -201,7 +209,7 @@ function Bidding({ updatePercents }) {
                         Somthing went wrong! Please try again.
                     </Alert>
                 }
-                {bidsSavedSuccessfuly && 
+                {bidsSavedSuccessfuly &&
                     <Alert severity="success">Bids updated successfuly</Alert>
                 }
                 <Button
