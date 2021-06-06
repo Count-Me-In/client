@@ -3,6 +3,10 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    background-image: url("../../images/background.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 20px;
 }
 
 .formLayout {
@@ -15,7 +19,10 @@
     border-color: #ffac33;
     margin-top: 20vh;
     width: 30vw;
-    height: 60vh;
+    height: 40vh;
+    background-color: gray;
+    opacity: 0.9;
+    margin-bottom: 185px;
 }
 
 .loginBox {

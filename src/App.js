@@ -137,7 +137,7 @@ function App() {
             {userAuth &&
               <div className={classes.navbarChild}>
                 <div className={classes.biddindData}>
-                  {currPoints !== undefined ? <label><strong>points: {currPoints}</strong></label> : null}
+                  {currPoints !== undefined ? <Typography.Title level={5}>Points: {currPoints} </Typography.Title> : null}
                   {currPercents ? <label><strong>Percents: {currPercents}%</strong></label> : null}
                 </div>
                 <Menu theme='light' style={{  borderBottom: 'unset', fontSize: '20px', fontWeight: 'normal' }} onClick={(e) => setTab(e.key)} selectedKeys={[tab]} mode="horizontal">

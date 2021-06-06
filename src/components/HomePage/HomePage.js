@@ -2,24 +2,13 @@ import React, { useState, useEffect } from 'react';
 import classes from './HomePage.module.css';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
-import { ViewState, EditingState, IntegratedEditing } from '@devexpress/dx-react-scheduler';
-import {
-    Scheduler,
-    MonthView,
-    Appointments,
-    AppointmentTooltip,
-    Toolbar,
-    DateNavigator,
-    TodayButton,
-    Resources,
-} from '@devexpress/dx-react-scheduler-material-ui';
+import { ViewState } from '@devexpress/dx-react-scheduler';
+import { Scheduler, MonthView, Appointments, AppointmentTooltip, Toolbar, DateNavigator, TodayButton, Resources } from '@devexpress/dx-react-scheduler-material-ui';
 import { teal, grey } from '@material-ui/core/colors';
 import { Button } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import Axios from 'axios';
-import { API_URL, TOKEN } from '../../Config/config';
-
-
+import { API_URL } from '../../Config/config';
 
 const allocations = [
     { text: 'We will see you at the office!', id: 1, color: teal },
@@ -31,14 +20,12 @@ function HomePage({isManager, setIsManager}) {
     const [userScheduler, setUserScheduler] = useState([]);
     const [scheduler, setScheduler] = useState([]);
     const [employees, setEmployees] = useState([]);
-    const [chosenEmployeeSched, setChosenEmployeeSched] = useState([]);//chosen employee to view
 
     const resources = [{
         fieldName: 'isIn',
         title: 'כניסה לשיעור',
         instances: allocations,
     }]
-
 
     const datesToScheduler = (dateLst) => {
         return dateLst.map(dt => ({
@@ -85,13 +72,11 @@ function HomePage({isManager, setIsManager}) {
         return <div dir={'rtl'}>
             {children}
         </div>
-
     }
+
     const TimeTableCell = ({ onDoubleClick, ...restProps }) => {
         return <MonthView.TimeTable onDoubleClick={undefined} {...restProps} />;
     };
-
-
 
     return (
         <div>
@@ -118,30 +103,15 @@ function HomePage({isManager, setIsManager}) {
             }
 
             <Paper dir={'ltr'}>
-                <Scheduler data-testid="arrivalScheduleCalander"
-                    data={scheduler}
-                // height={650}
-                >
-                    <ViewState
-                        currentDate={currentDate}
-                        onCurrentDateChange={(date) => setDate(date)}
-
-                    />
-                    <MonthView
-                        onDoubleClick={undefined}
-
-                    />
+                <Scheduler data-testid="arrivalScheduleCalander" data={scheduler}>
+                    <ViewState currentDate={currentDate} onCurrentDateChange={(date) => setDate(date)} />
+                    <MonthView onDoubleClick={undefined} />
                     <Toolbar />
-
                     <DateNavigator />
                     <TodayButton />
                     <Appointments dir={'rtl'} />
-                    <Resources
-                        data={resources}
-                    />
-                    <AppointmentTooltip
-                        showCloseButton
-                    />
+                    <Resources data={resources} />
+                    <AppointmentTooltip showCloseButton />
                 </Scheduler>
             </Paper>
         </div>
