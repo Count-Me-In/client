@@ -191,6 +191,21 @@ function Bidding({ updatePercents }) {
                             </Alert>
                         </div>
                     }
+                    {somthingWentWrongAlert &&
+                        <div className={classes.alert}>
+
+                            <Alert className={classes.innerMessage} severity="error">
+                                <AlertTitle>Error</AlertTitle>
+                            Somthing went wrong! Please try again.
+                        </Alert>
+                        </div>
+                    }
+                    {bidsSavedSuccessfuly &&
+                        <div className={classes.alert}>
+
+                            <Alert className={classes.innerMessage} severity="success">Bids updated successfuly</Alert>
+                        </div>
+                    }
                     <Scheduler data={appointments}>
                         <ViewState defaultCurrentDate={sunday} />
                         <WeekView
@@ -203,15 +218,7 @@ function Bidding({ updatePercents }) {
                         <Appointments appointmentContentComponent={BiddingSlot} />
                     </Scheduler>
                 </Paper>
-                {somthingWentWrongAlert &&
-                    <Alert severity="error">
-                        <AlertTitle>Error</AlertTitle>
-                        Somthing went wrong! Please try again.
-                    </Alert>
-                }
-                {bidsSavedSuccessfuly &&
-                    <Alert severity="success">Bids updated successfuly</Alert>
-                }
+
                 <Button
                     data-testid="saveBiddingBtn"
                     type='primary'
