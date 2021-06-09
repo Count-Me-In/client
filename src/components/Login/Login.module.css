@@ -20,8 +20,8 @@
     margin-top: 20vh;
     width: 30vw;
     height: 40vh;
-    background-color: gray;
-    opacity: 0.9;
+    background-color: rgb(238, 184, 103);
+    opacity: 0.6;
     margin-bottom: 185px;
 }
 
@@ -35,7 +35,8 @@
 .loginInput {
     width: 20vw;
     margin-bottom: 1vh!important;
-    text-align:right
+    text-align:right;
+    background-color: rgb(232, 242, 243);
 }
 
 
@@ -43,6 +44,8 @@
     width: 15vw;
     margin-top: 1vh !important;
     margin-bottom: 2vh!important;
+    background-color: rgb(232, 242, 243)!important;
+    opacity: 0.9;
 }
 
 .checkboxFaculty {

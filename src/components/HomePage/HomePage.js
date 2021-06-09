@@ -79,7 +79,7 @@ function HomePage({isManager, setIsManager}) {
     };
 
     return (
-        <div>
+        <div className={classes.container}>
             {isManager &&
                 <div className={classes.customActions}>
                     <Button onClick={() => setScheduler(userScheduler)}>My Schedule</Button>
