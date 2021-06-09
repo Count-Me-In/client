@@ -81,7 +81,7 @@ function Bidding({ updatePercents }) {
     }, []);
 
     const sendInvites = (invites) => {
-        if (invites.some((invite) => invite.length > 0)) {
+        if (invites.some((invite) => invite != undefined && invite.length > 0)) {
             Axios.post(`${API_URL}/employees/invites`, invites, {})
                 .catch((err) => { console.log(err) })
         }
