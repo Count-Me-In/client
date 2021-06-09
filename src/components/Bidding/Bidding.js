@@ -81,9 +81,10 @@ function Bidding({ updatePercents }) {
     }, []);
 
     const sendInvites = (invites) => {
-        console.log(invites)
-        Axios.post(`${API_URL}/employees/invites`, invites, {})
-            .catch((err) => { console.log(err) })
+        if (invites.some((invite) => invite.length > 0)) {
+            Axios.post(`${API_URL}/employees/invites`, invites, {})
+                .catch((err) => { console.log(err) })
+        }
     }
 
     const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
@@ -123,10 +124,6 @@ function Bidding({ updatePercents }) {
         const startDate = new Date(restProps.data.startDate)
         const endDate = new Date(restProps.data.endDate)
 
-        if (!allowedDays.includes(restProps.data.id)) {
-            return (
-               
-        }
         const handlePercentsChange = (value, prevValue) => {
             const bids = form.getFieldValue('bids');
             let sum = form.getFieldValue('bids').reduce((accum, item, index) => {
@@ -188,7 +185,8 @@ function Bidding({ updatePercents }) {
         <div >
             <Form
                 initialValues={{
-                    bids: [0, 0, 0, 0, 0]
+                    bids: [0, 0, 0, 0, 0],
+                    invites: [[], [], [], [], []]
                 }
                 }
                 form={form}
@@ -233,16 +231,16 @@ function Bidding({ updatePercents }) {
                         <Appointments appointmentContentComponent={BiddingSlot} />
                     </Scheduler>
                 </Paper>
-            <Button
-                data-testid="saveBiddingBtn"
-                type='primary'
-                shape='round'
-                size='large'
-                htmlType='submit'
-                style={{ position: 'fixed', bottom: '12vh', left: 'calc(100% - 200px)' }}
-                icon={<SaveOutlined />}
-            >
-                Save Biddings
+                <Button
+                    data-testid="saveBiddingBtn"
+                    type='primary'
+                    shape='round'
+                    size='large'
+                    htmlType='submit'
+                    style={{ position: 'fixed', bottom: '12vh', left: 'calc(100% - 200px)' }}
+                    icon={<SaveOutlined />}
+                >
+                    Save Biddings
                 </Button>
             </Form>
         </div >
