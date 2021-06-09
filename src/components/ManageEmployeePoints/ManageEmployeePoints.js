@@ -63,7 +63,7 @@ function ManageEmployeePoints() {
                 {employees.map((emp) => <EmployeePoints onPointsChanged={handlePointsChange} username={emp.username} name={emp.name} points={emp.points}></EmployeePoints>)}
             </div>
             <h1 className={classes.totalPoints}>Points left to split: {leftToSplit}/{totalPoints}</h1>
-            <Button onClick={updatePoints} style={{ width: 'fit-content', margin: '5px' }} variant="contained" color="primary">
+            <Button data-testid="updatePointsBtn" onClick={updatePoints} style={{ width: 'fit-content', margin: '5px' }} variant="contained" color="primary">
                 Update points
             </Button>
             {pointsUpdatedSuccessfuly &&
