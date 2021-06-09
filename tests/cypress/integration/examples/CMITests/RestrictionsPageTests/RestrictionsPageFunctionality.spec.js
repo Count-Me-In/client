@@ -15,5 +15,7 @@ context('Log in page appearance tests', () => {
       cy.url().should('include', '/Home')
       cy.get('[data-testid=managerPanelLink]').click() 
       cy.contains("Employees points").click()
+      cy.get('[data-testid=logoutBtn]').click()
+      cy.url().should('include', '/login')
     })
 })

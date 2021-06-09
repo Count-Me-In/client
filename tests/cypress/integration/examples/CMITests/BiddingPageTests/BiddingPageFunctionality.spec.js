@@ -14,6 +14,8 @@ context('Bidding page functionality tests', () => {
     cy.url().should('include', '/Home')
     cy.get('[data-testid=biddingLink]').click()
     cy.url().should('include', '/bidding')
+    cy.get('[data-testid=logoutBtn]').click()
+    cy.url().should('include', '/login')
   })
 
 })
