@@ -166,6 +166,11 @@ function App() {
                         Days restriction
                       </Link>
                     </Menu.Item>
+                    <Menu.Item key="auction">
+                      <button onClick={()=>{Axios.get(`${API_URL}/employees/auction`, {}, {}).catch((err) => { console.log(err) })}}>
+                        Auction
+                      </button>
+                    </Menu.Item>
                   </SubMenu>
                   <Menu.Item key="logout">
                     <Link data-testid="logoutBtn" onClick={() => {

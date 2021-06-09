@@ -24,6 +24,7 @@ function Bidding({ updatePercents }) {
     const [somthingWentWrongAlert, setsomthingWentWrongAlert] = React.useState(false);
     const [bidsSavedSuccessfuly, setBidsSavedSuccessfuly] = React.useState(false);
     const [form] = Form.useForm();
+    const [allowedDays, setallowedDays] = React.useState([]);
 
     let sunday = getNextSunday();
     const tempDate = new Date(sunday);
@@ -73,6 +74,10 @@ function Bidding({ updatePercents }) {
                 // updateAppointments(BidCollection)
             }
         }).catch((err) => console.log(err))
+
+        Axios.get(`${API_URL}/employees/getEmployeesRestriction`).then(({ data: restriction }) => {
+            setallowedDays(restriction._allowed_days)
+        }).catch((err) => console.log(err))
     }, []);
 
     const sendInvites = (invites) => {
@@ -118,6 +123,10 @@ function Bidding({ updatePercents }) {
         const startDate = new Date(restProps.data.startDate)
         const endDate = new Date(restProps.data.endDate)
 
+        if (!allowedDays.includes(restProps.data.id)) {
+            return (
+               
+        }
         const handlePercentsChange = (value, prevValue) => {
             const bids = form.getFieldValue('bids');
             let sum = form.getFieldValue('bids').reduce((accum, item, index) => {
@@ -137,36 +146,42 @@ function Bidding({ updatePercents }) {
         }
 
         return (
-            <Appointments.AppointmentContent  {...restProps}>
-                <div className={classes.container} data-testid="biddingSlots">
-                    <div data-testid="biddingCalendar">
-                        {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
-                            + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
-                    <Form.Item name={['invites', restProps.data.id]}>
-                        <Select
-                            data-testid="inviteFriend"
-                            mode="multiple"
-                            allowClear
-                            showSearch
-                            style={{ width: '100%' }}
-                            placeholder="Invite a friend"
-                            filterOption={(input, option) => {
-                                return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                            }}
-                        >
-                            {employees.map((emp, i) => (
-                                <Option key={i} value={emp.username}>{emp.name}</Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item normalize={handlePercentsChange} label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <InputNumber
-                            data-testid="percentsSlots"
-                        />
-                    </Form.Item>
+            <> {!allowedDays.includes(restProps.data.id) ?
+                <Appointments.AppointmentContent {...restProps}>
+                    <div>
+                        Restricted Day
                 </div>
-            </Appointments.AppointmentContent>
-        );
+                </Appointments.AppointmentContent> :
+                <Appointments.AppointmentContent {...restProps}>
+                    <div className={classes.container} data-testid="biddingSlots">
+                        <div data-testid="biddingCalendar">
+                            {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
+                                + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
+                        <Form.Item name={['invites', restProps.data.id]}>
+                            <Select
+                                data-testid="inviteFriend"
+                                mode="multiple"
+                                allowClear
+                                showSearch
+                                style={{ width: '100%' }}
+                                placeholder="Invite a friend"
+                                filterOption={(input, option) => {
+                                    return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                }}
+                            >
+                                {employees.map((emp, i) => (
+                                    <Option key={i} value={emp.username}>{emp.name}</Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item normalize={handlePercentsChange} label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                            <InputNumber
+                                data-testid="percentsSlots"
+                            />
+                        </Form.Item>
+                    </div>
+                </Appointments.AppointmentContent>}
+            </>);
     };
 
     return (
@@ -218,20 +233,19 @@ function Bidding({ updatePercents }) {
                         <Appointments appointmentContentComponent={BiddingSlot} />
                     </Scheduler>
                 </Paper>
-
-                <Button
-                    data-testid="saveBiddingBtn"
-                    type='primary'
-                    shape='round'
-                    size='large'
-                    htmlType='submit'
-                    style={{ position: 'fixed', bottom: '12vh', left: 'calc(100% - 200px)' }}
-                    icon={<SaveOutlined />}
-                >
-                    Save Biddings
+            <Button
+                data-testid="saveBiddingBtn"
+                type='primary'
+                shape='round'
+                size='large'
+                htmlType='submit'
+                style={{ position: 'fixed', bottom: '12vh', left: 'calc(100% - 200px)' }}
+                icon={<SaveOutlined />}
+            >
+                Save Biddings
                 </Button>
             </Form>
-        </div>
+        </div >
     )
 }
 
