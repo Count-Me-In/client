@@ -188,7 +188,6 @@ function Bidding({ updatePercents }) {
                 }
                 form={form}
                 onFinish={({ invites, bids }) => {
-                    debugger
                     updateAppointmentsOnServer(bids);
                     sendInvites(invites);
                 }}
