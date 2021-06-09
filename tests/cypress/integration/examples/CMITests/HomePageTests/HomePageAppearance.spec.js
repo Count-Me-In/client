@@ -10,10 +10,9 @@ context('Home page appearance tests', () => {
 
     it('We can see the logged in nav bar', () => {
         cy.contains("Count Me In The Office!")
-        cy.contains("points:")
+        cy.contains("Points:")
         cy.get('[data-testid=scheduleLink]').should('exist')
         cy.get('[data-testid=biddingLink]').should('exist')
-        cy.get('[data-testid=managerPanelLink]').should('exist')
         cy.get('[data-testid=logoutBtn]').should('exist')
     })
 

@@ -103,16 +103,18 @@ function HomePage({isManager, setIsManager}) {
             }
 
             <Paper dir={'ltr'}>
-                <Scheduler data-testid="arrivalScheduleCalander" data={scheduler}>
-                    <ViewState currentDate={currentDate} onCurrentDateChange={(date) => setDate(date)} />
-                    <MonthView onDoubleClick={undefined} />
-                    <Toolbar />
-                    <DateNavigator />
-                    <TodayButton />
-                    <Appointments dir={'rtl'} />
-                    <Resources data={resources} />
-                    <AppointmentTooltip showCloseButton />
-                </Scheduler>
+                <div data-testid="arrivalScheduleCalander" >
+                    <Scheduler data={scheduler}>
+                        <ViewState currentDate={currentDate} onCurrentDateChange={(date) => setDate(date)} />
+                        <MonthView onDoubleClick={undefined} />
+                        <Toolbar />
+                        <DateNavigator />
+                        <TodayButton />
+                        <Appointments dir={'rtl'} />
+                        <Resources data={resources} />
+                        <AppointmentTooltip showCloseButton />
+                    </Scheduler>
+                </div>
             </Paper>
         </div>
     )

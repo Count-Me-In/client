@@ -9,11 +9,11 @@ context('Bidding page functionality tests', () => {
     cy.get('[data-testid=biddingLink]').click()    
   })
 
-  it('We can save bidding', () => {
-    cy.get('[data-testid=biddingSlots]').type("50")
-    cy.get('[data-testid=saveBiddingBtn]').click()
-    cy.get('[data-testid=percentsSlots]').invoke('val').then(sometext => 
-      expect(sometext).to.eq("50")
-    )
+  it('We can navigate the app through the nav bar', () => {
+    cy.get('[data-testid=scheduleLink]').click()
+    cy.url().should('include', '/Home')
+    cy.get('[data-testid=biddingLink]').click()
+    cy.url().should('include', '/bidding')
   })
+
 })
