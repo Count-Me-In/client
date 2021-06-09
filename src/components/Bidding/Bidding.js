@@ -71,7 +71,6 @@ function Bidding({ updatePercents }) {
                     sum += item.percentage;
                 })
                 updatePercents(sum)
-                // updateAppointments(BidCollection)
             }
         }).catch((err) => console.log(err))
 
@@ -94,7 +93,7 @@ function Bidding({ updatePercents }) {
         //first - update original bids object
         const new_origin = originalBidsObj.map((item) => ({
             ...item,
-            percentage: item.percentage
+            percentage: bids[item.day -1]
         }))
 
         Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
@@ -125,7 +124,6 @@ function Bidding({ updatePercents }) {
         const endDate = new Date(restProps.data.endDate)
 
         const handlePercentsChange = (value, prevValue) => {
-            const bids = form.getFieldValue('bids');
             let sum = form.getFieldValue('bids').reduce((accum, item, index) => {
                 return index === restProps.data.id ? accum + value : accum + item;
             }, 0)
@@ -143,19 +141,18 @@ function Bidding({ updatePercents }) {
         }
 
         return (
-            <> {!allowedDays.includes(restProps.data.id) ?
-                <Appointments.AppointmentContent {...restProps}>
-                    <div>
-                        Restricted Day
-                </div>
-                </Appointments.AppointmentContent> :
                 <Appointments.AppointmentContent {...restProps}>
                     <div className={classes.container} data-testid="biddingSlots">
+                        {!allowedDays.includes(restProps.data.id + 1) &&
+                        <div>
+                            Restricted Day
+                        </div>}
                         <div data-testid="biddingCalendar">
                             {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
                                 + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
                         <Form.Item name={['invites', restProps.data.id]}>
                             <Select
+                                disabled={!allowedDays.includes(restProps.data.id + 1)}
                                 data-testid="inviteFriend"
                                 mode="multiple"
                                 allowClear
@@ -173,12 +170,12 @@ function Bidding({ updatePercents }) {
                         </Form.Item>
                         <Form.Item normalize={handlePercentsChange} label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                             <InputNumber
+                                disabled={!allowedDays.includes(restProps.data.id + 1)}
                                 data-testid="percentsSlots"
                             />
                         </Form.Item>
                     </div>
-                </Appointments.AppointmentContent>}
-            </>);
+                </Appointments.AppointmentContent>)
     };
 
     return (
@@ -191,6 +188,7 @@ function Bidding({ updatePercents }) {
                 }
                 form={form}
                 onFinish={({ invites, bids }) => {
+                    debugger
                     updateAppointmentsOnServer(bids);
                     sendInvites(invites);
                 }}
