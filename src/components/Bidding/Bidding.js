@@ -41,11 +41,11 @@ function Bidding({ updatePercents }) {
     }
 
     const schedulerData = [
-        { id: 1, startDate: sunday.toISOString(), endDate: getEndDate(sunday).toISOString(), percents: 0 },
-        { id: 2, startDate: monday.toISOString(), endDate: getEndDate(monday).toISOString(), percents: 0 },
-        { id: 3, startDate: tuesday.toISOString(), endDate: getEndDate(tuesday).toISOString(), percents: 0 },
-        { id: 4, startDate: wednesday.toISOString(), endDate: getEndDate(wednesday).toISOString(), percents: 0 },
-        { id: 5, startDate: thursday.toISOString(), endDate: getEndDate(thursday).toISOString(), percents: 0 },
+        { id: 0, startDate: sunday.toISOString(), endDate: getEndDate(sunday).toISOString(), percents: 0 },
+        { id: 1, startDate: monday.toISOString(), endDate: getEndDate(monday).toISOString(), percents: 0 },
+        { id: 2, startDate: tuesday.toISOString(), endDate: getEndDate(tuesday).toISOString(), percents: 0 },
+        { id: 3, startDate: wednesday.toISOString(), endDate: getEndDate(wednesday).toISOString(), percents: 0 },
+        { id: 4, startDate: thursday.toISOString(), endDate: getEndDate(thursday).toISOString(), percents: 0 },
     ]
 
     const [appointments, setAppointments] = useState(schedulerData);
@@ -63,7 +63,15 @@ function Bidding({ updatePercents }) {
 
         Axios.get(`${API_URL}/employees/bids_collection`).then(({ data: BidCollection }) => {
             if (BidCollection.length === 5) {
-                updateAppointments(BidCollection)
+                form.setFieldsValue({ 'bids': BidCollection.map((item) => item.percentage) })
+                setoriginalBidsObj(BidCollection)
+
+                let sum = 0;//TODO: need this?
+                BidCollection.forEach((item) => {
+                    sum += item.percentage;
+                })
+                updatePercents(sum)
+                // updateAppointments(BidCollection)
             }
         }).catch((err) => console.log(err))
 
@@ -72,29 +80,22 @@ function Bidding({ updatePercents }) {
         }).catch((err) => console.log(err))
     }, []);
 
-    //update appointments on first upload and on every change
-    const updateAppointments = (data) => {
-        const newAppointments = appointments.map((appointment) => {
-            appointment.percents = data[appointment.id - 1].percentage;
-            return appointment;
-        })
-        setAppointments(newAppointments)
-        setoriginalBidsObj(data)
-
-        let sum = 0;
-        appointments.forEach((appointment) => {
-            sum += appointment.percents;
-        })
-        updatePercents(sum)
+    const sendInvites = (invites) => {
+        if (invites.some((invite) => invite.length > 0)) {
+            Axios.post(`${API_URL}/employees/invites`, invites, {})
+                .catch((err) => { console.log(err) })
+        }
     }
 
-    const updateAppointmentsOnServer = () => {
+    const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
+    updatePercents(totalPercents)
 
+    const updateAppointmentsOnServer = (bids) => {
         //first - update original bids object
-        var new_origin = originalBidsObj
-        for (var i = 0; i < new_origin.length; i++) {
-            new_origin[i]['percentage'] = appointments[new_origin[i]['day'] - 1]['percents'];
-        }
+        const new_origin = originalBidsObj.map((item) => ({
+            ...item,
+            percentage: item.percentage
+        }))
 
         Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
             .then((response) => {
@@ -115,17 +116,6 @@ function Bidding({ updatePercents }) {
             })
     }
 
-    const sendInvites = (invites) => {
-        if (invites.find(val => val !== null) !== undefined) {
-            console.log(invites)
-            Axios.post(`${API_URL}/employees/invites`, invites, {})
-                .catch((err) => { console.log(err) })
-        }
-    }
-
-    const totalPercents = appointments.reduce((total, { percents }) => total + parseInt(percents), 0)
-    updatePercents(totalPercents)
-
     const TimeTableCell = ({ onDoubleClick, ...restProps }) => {
         return <WeekView.TimeTableCell onDoubleClick={undefined} {...restProps} />;
     };
@@ -133,86 +123,102 @@ function Bidding({ updatePercents }) {
     const BiddingSlot = ({ style, ...restProps }) => {
         const startDate = new Date(restProps.data.startDate)
         const endDate = new Date(restProps.data.endDate)
-        const [percents, setPercents] = React.useState(restProps.data.percents);
 
-        if (!allowedDays.includes(restProps.data.id)) {
-            return (
-                <Appointments.AppointmentContent {...restProps}>
-                    <div>
-                        Restricted Day
-                    </div>
-                </Appointments.AppointmentContent>);
-        }
+        const handlePercentsChange = (value, prevValue) => {
+            const bids = form.getFieldValue('bids');
+            let sum = form.getFieldValue('bids').reduce((accum, item, index) => {
+                return index === restProps.data.id ? accum + value : accum + item;
+            }, 0)
 
-        const handlePercentsChange = (value) => {
-            let sum = 0
-            const newAppointments = appointments.map((item) => {
-                if (restProps.data.id === item.id) {
-                    sum += value;
-                    return {
-                        ...item,
-                        percents: value
-                    }
-                }
-                sum += item.percents;
-                return item
-            })
-
-            if (sum <= 100) {
-                setPercents(parseInt(value))
-                setAppointments(newAppointments)
-            } else {
+            if (sum > 100) {
                 setAlert(true)
                 setTimeout(() => {
                     setAlert(false)
                 }, 3000)
+
+                return prevValue
             }
+
+            return value
         }
 
         return (
-            <Appointments.AppointmentContent {...restProps}>
-                <div className={classes.container} data-testid="biddingSlots">
-                    <div data-testid="biddingCalendar">
-                        {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
-                            + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
-                    <Form.Item name={['invites', restProps.data.id - 1]}>
-                        <Select
-                            data-testid="inviteFriend"
-                            mode="multiple"
-                            allowClear
-                            showSearch
-                            style={{ width: '100%' }}
-                            placeholder="Invite a friend"
-                            filterOption={(input, option) => {
-                                return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-                            }}
-                        >
-                            {employees.map((emp, i) => (
-                                <Option key={i} value={emp.username}>{emp.name}</Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
-                    <Form.Item label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <InputNumber
-                            data-testid="percentsSlots"
-                            defaultValue={percents}
-                            onChange={handlePercentsChange} />
-                    </Form.Item>
+            <> {!allowedDays.includes(restProps.data.id) ?
+                <Appointments.AppointmentContent {...restProps}>
+                    <div>
+                        Restricted Day
                 </div>
-            </Appointments.AppointmentContent >
-        );
+                </Appointments.AppointmentContent> :
+                <Appointments.AppointmentContent {...restProps}>
+                    <div className={classes.container} data-testid="biddingSlots">
+                        <div data-testid="biddingCalendar">
+                            {startDate.getHours() + ':' + (startDate.getMinutes() < 10 ? '0' + startDate.getMinutes() : startDate.getMinutes())
+                                + ' - ' + endDate.getHours() + ':' + (endDate.getMinutes() < 10 ? '0' + endDate.getMinutes() : endDate.getMinutes())}</div>
+                        <Form.Item name={['invites', restProps.data.id]}>
+                            <Select
+                                data-testid="inviteFriend"
+                                mode="multiple"
+                                allowClear
+                                showSearch
+                                style={{ width: '100%' }}
+                                placeholder="Invite a friend"
+                                filterOption={(input, option) => {
+                                    return option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                                }}
+                            >
+                                {employees.map((emp, i) => (
+                                    <Option key={i} value={emp.username}>{emp.name}</Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                        <Form.Item normalize={handlePercentsChange} label='Percents' name={['bids', restProps.data.id]} style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                            <InputNumber
+                                data-testid="percentsSlots"
+                            />
+                        </Form.Item>
+                    </div>
+                </Appointments.AppointmentContent>}
+            </>);
     };
 
     return (
         <div >
             <Form
+                initialValues={{
+                    bids: [0, 0, 0, 0, 0],
+                    invites: [[], [], [], [], []]
+                }
+                }
                 form={form}
-                onFinish={({ invites }) => {
-                    updateAppointmentsOnServer();
+                onFinish={({ invites, bids }) => {
+                    updateAppointmentsOnServer(bids);
                     sendInvites(invites);
                 }}
             >
                 <Paper dir={'ltr'}>
+                    {showAlert &&
+                        <div className={classes.alert}>
+                            <Alert className={classes.innerMessage} severity="warning">
+                                <AlertTitle>Notice</AlertTitle>
+                                You must fill 100%
+                            </Alert>
+                        </div>
+                    }
+                    {somthingWentWrongAlert &&
+                        <div className={classes.alert}>
+
+                            <Alert className={classes.innerMessage} severity="error">
+                                <AlertTitle>Error</AlertTitle>
+                            Somthing went wrong! Please try again.
+                        </Alert>
+                        </div>
+                    }
+                    {bidsSavedSuccessfuly &&
+                        <div className={classes.alert}>
+
+                            <Alert className={classes.innerMessage} severity="success">Bids updated successfuly</Alert>
+                        </div>
+                    }
                     <Scheduler data={appointments}>
                         <ViewState defaultCurrentDate={sunday} />
                         <WeekView
@@ -225,15 +231,6 @@ function Bidding({ updatePercents }) {
                         <Appointments appointmentContentComponent={BiddingSlot} />
                     </Scheduler>
                 </Paper>
-                {somthingWentWrongAlert &&
-                    <Alert severity="error">
-                        <AlertTitle>Error</AlertTitle>
-                        Somthing went wrong! Please try again.
-                    </Alert>
-                }
-                {bidsSavedSuccessfuly &&
-                    <Alert severity="success">Bids updated successfuly</Alert>
-                }
                 <Button
                     data-testid="saveBiddingBtn"
                     type='primary'
@@ -246,7 +243,7 @@ function Bidding({ updatePercents }) {
                     Save Biddings
                 </Button>
             </Form>
-        </div>
+        </div >
     )
 }
 
