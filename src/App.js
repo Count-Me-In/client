@@ -24,6 +24,9 @@ import Axios from 'axios';
 import { API_URL, TOKEN } from './Config/config';
 import 'antd/dist/antd.css';
 import SubMenu from 'antd/lib/menu/SubMenu';
+import ManageUsers from './components/ManageUsers/ManageUsers';
+import ManageCapacity from './components/ManageCapacity/ManageCapacity';
+// import ManageUsers from './components/ManageUsers'
 
 const theme = createMuiTheme({
   typography: {
@@ -140,7 +143,7 @@ function App() {
                   {currPoints !== undefined ? <Typography.Title level={5}>Points: {currPoints} </Typography.Title> : null}
                   {currPercents ? <label><strong>Percents: {currPercents}%</strong></label> : null}
                 </div>
-                <Menu theme='light' style={{  borderBottom: 'unset', fontSize: '20px', fontWeight: 'normal' }} onClick={(e) => setTab(e.key)} selectedKeys={[tab]} mode="horizontal">
+                <Menu theme='light' style={{ borderBottom: 'unset', fontSize: '20px', fontWeight: 'normal' }} onClick={(e) => setTab(e.key)} selectedKeys={[tab]} mode="horizontal">
                   <Menu.Item key="Schedule">
                     <Link to="/Home" className={!userAuth || tab != 1 ? classes.link : classes.clickedLink} data-testid="scheduleLink">
                       {/* <h3> */}
@@ -166,10 +169,22 @@ function App() {
                         Days restriction
                       </Link>
                     </Menu.Item>
-                    <Menu.Item key="auction">
-                      <button onClick={()=>{Axios.get(`${API_URL}/employees/auction`, {}, {}).catch((err) => { console.log(err) })}}>
+                    {/* <Menu.Item key="auction">
+                      <button onClick={() => { Axios.get(`${API_URL}/employees/auction`, {}, {}).catch((err) => { console.log(err) }) }}>
                         Auction
                       </button>
+                    </Menu.Item> */}
+                  </SubMenu>
+                  <SubMenu key="Admin Panel" data-testid="adminPanelLink" style={!isManager ? { display: 'none' } : {}} disabled={!isManager} title="Admin Panel">
+                    <Menu.Item key="manageUsers">
+                      <Link to="/manageUsers">
+                        Manage Users
+                      </Link>
+                    </Menu.Item>
+                    <Menu.Item key="manageCapacity">
+                      <Link to="/manageCapacity" >
+                        Manage Capacity
+                      </Link>
                     </Menu.Item>
                   </SubMenu>
                   <Menu.Item key="logout">
@@ -207,6 +222,13 @@ function App() {
 
           <PrivateRoute isManager={isManager} path="/restriction">
             <Restrictions />
+          </PrivateRoute>
+
+          <PrivateRoute isManager={isManager} path="/manageUsers">
+            <ManageUsers />
+          </PrivateRoute>
+          <PrivateRoute isManager={isManager} path="/manageCapacity">
+            <ManageCapacity />
           </PrivateRoute>
           <Route path="/">
             <Redirect
