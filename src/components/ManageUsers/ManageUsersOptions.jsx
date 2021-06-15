@@ -21,6 +21,7 @@ export const columns = (handleDelete, handleSave, managerOptions) => [
 		key: 'manager',
 		title: 'Manager',
 		dataIndex: 'manager',
+		editable: true,
 		editComponent: (props) => <Select options={managerOptions} {...props} />
 
 	},
