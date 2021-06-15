@@ -36,24 +36,25 @@ const EditableCell = ({
 		form.setFieldsValue({
 			[dataIndex]: record[dataIndex],
 		});
-		// 	if (editing) {
-		// 		inputRef.current.focus();
-		// 	}
+		if (editing) {
+			inputRef.current.focus();
+		}
 	}, []);
 
 	const toggleEdit = () => {
 		setEditing(!editing);
-		// 	form.setFieldsValue({
-		// 		[dataIndex]: record[dataIndex],
-		// 	});
+		form.setFieldsValue({
+			[dataIndex]: record[dataIndex],
+		});
 	};
 
 	const save = async () => {
 		try {
 			const values = form.getFieldsValue(true);
+			if (!record.isNew) {
+				toggleEdit();
+			}
 
-			// const values = await form.validateFields();
-			// toggleEdit();
 			handleSave({ ...record, ...values });
 			console.log({ ...record, ...values });
 		} catch (errInfo) {
@@ -64,38 +65,47 @@ const EditableCell = ({
 	let childNode = children;
 
 	if (editable) {
-		childNode = dataIndex !== 'operations' ? (
-			<Form.Item
+		childNode = !record.isNew && !editing ?
+			<div
+				className="editable-cell-value-wrap"
 				style={{
-					margin: 0,
+					paddingRight: 24,
 				}}
-				name={dataIndex}
-				rules={[
-					{
-						required: true,
-						message: `${title} is required.`,
-					},
-				]}
+				onClick={toggleEdit}
 			>
-				<EditComponent ref={inputRef} onPressEnter={save} onBlur={save} />
-			</Form.Item>
-		) : (
-			<>
-				<Popconfirm title="Sure to delete?" onConfirm={() => onDelete(record.key)}>
-					<Tooltip title="delete">
-						<Button icon={<DeleteFilled />} />
-					</Tooltip>
-				</Popconfirm>
-				<Tooltip title="save">
-					<Button onClick={() => {
-						form.submit()
-						// form.setFieldsValue({ key: record.key })
-						// setTimeout(form.submit, 0)
-					}} icon={<SaveFilled />} />
-				</Tooltip>
-			</>
+				{children}
+			</div> :
+			record.isNew && dataIndex === 'operations' ?
+				(
+					<>
+						<Popconfirm title="Sure to delete?" onConfirm={() => onDelete(record.key)}>
+							<Tooltip title="delete">
+								<Button icon={<DeleteFilled />} />
+							</Tooltip>
+						</Popconfirm>
+						<Tooltip title="save">
+							<Button onClick={() => {
+								form.submit()
+							}} icon={<SaveFilled />} />
+						</Tooltip>
+					</>
 
-		);
+				) : (
+					<Form.Item
+						style={{
+							margin: 0,
+						}}
+						name={dataIndex}
+						rules={[
+							{
+								required: true,
+								message: `${title} is required.`,
+							},
+						]}
+					>
+						<EditComponent ref={inputRef} onPressEnter={save} onBlur={save} />
+					</Form.Item>
+				);
 	}
 
 	return <td {...restProps}>{childNode}</td>;
@@ -114,7 +124,7 @@ const EditableTable = ({ onAdd, onEdit, onSave, onDelete, columns, data }) => {
 			...col,
 			onCell: (record) => ({
 				record,
-				editable: record.isNew,
+				editable: record.isNew || col.editable,
 				dataIndex: col.dataIndex,
 				title: col.title,
 				handleSave: onEdit,
