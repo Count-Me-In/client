@@ -56,6 +56,7 @@ function App() {
   const [currPercents, setCurrPercents] = useState();//TODO: ask from server
   const [anchorEl, setAnchorEl] = useState(null);
   // const [userAuth, setAuth] = useState()
+  const [isAdmin, setIsAdmin] = React.useState(false);
   const [isManager, setIsManager] = React.useState(false);
   const anchorRef = React.useRef(null);
 
@@ -175,7 +176,7 @@ function App() {
                       </button>
                     </Menu.Item> */}
                   </SubMenu>
-                  <SubMenu key="Admin Panel" data-testid="adminPanelLink" style={!isManager ? { display: 'none' } : {}} disabled={!isManager} title="Admin Panel">
+                  <SubMenu key="Admin Panel" data-testid="adminPanelLink" style={!isAdmin ? { display: 'none' } : {}} disabled={!isAdmin} title="Admin Panel">
                     <Menu.Item key="manageUsers">
                       <Link to="/manageUsers">
                         Manage Users
@@ -191,6 +192,7 @@ function App() {
                     <Link data-testid="logoutBtn" onClick={() => {
                       localStorage.setItem('auth', '')
                       setIsManager(false);
+                      setIsAdmin(false);
                     }} to="/" className={classes.logout}>
                       log out
                     </Link>
@@ -208,7 +210,8 @@ function App() {
             <Bidding updatePercents={(p) => { setCurrPercents(p) }} />
           </PrivateRoute>
           <Route path="/login">
-            <Login onLogin={() => {
+            <Login onLogin={(username) => {
+              setIsAdmin(username === 'admin');
               setTab('Schedule')
               Axios.get(`${API_URL}/employees/employeePoints`).then(({ data }) => {
                 setCurrPoints(data)
@@ -216,18 +219,18 @@ function App() {
             }} />
           </Route>
 
-          <PrivateRoute isManager={isManager} path="/employeesPoints">
+          <PrivateRoute allowed={isManager} path="/employeesPoints">
             <ManageEmployeePoints />
           </PrivateRoute>
 
-          <PrivateRoute isManager={isManager} path="/restriction">
+          <PrivateRoute allowed={isManager} path="/restriction">
             <Restrictions />
           </PrivateRoute>
 
-          <PrivateRoute isManager={isManager} path="/manageUsers">
+          <PrivateRoute allowed={isAdmin} path="/manageUsers">
             <ManageUsers />
           </PrivateRoute>
-          <PrivateRoute isManager={isManager} path="/manageCapacity">
+          <PrivateRoute allowed={isAdmin} path="/manageCapacity">
             <ManageCapacity />
           </PrivateRoute>
           <Route path="/">
@@ -244,7 +247,7 @@ function App() {
   );
 }
 
-function PrivateRoute({ children, isManager }) {
+function PrivateRoute({ children, allowed }) {
   return (
     <Route
       render={({ location }) =>
@@ -256,7 +259,7 @@ function PrivateRoute({ children, isManager }) {
                 state: { from: location }
               }}
             />
-          ) : isManager === undefined || isManager ?
+          ) : allowed === undefined || allowed ?
             (children) :
             (
               <Redirect

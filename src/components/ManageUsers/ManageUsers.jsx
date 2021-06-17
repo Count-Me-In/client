@@ -48,7 +48,7 @@ const ManageUsers = () => {
 	const handleDelete = (key) => {
 		const rowToDelete = dataSource.find((item) => item.key == key);
 		if (!rowToDelete.isNew) {
-			Axios.delete(`${API_URL}/admin/deleteEmployee`, {
+			Axios.delete(`${API_URL}/admin/deleteEmployee`, {}, {
 				params: {
 					username: rowToDelete.username
 				}
@@ -70,7 +70,11 @@ const ManageUsers = () => {
 		}
 
 		if (!row.isNew) {
-			// Axios.put(`${API_URL}/admin/employee`, {...row}, {params: {username: row.username}})
+			Axios.put(`${API_URL}/admin/updateManager`, {}, {
+				params: {
+					employee_username: row.username,
+					manager_username: row.manager
+				}})
 		}
 
 		setDataSource(newData);
