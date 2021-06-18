@@ -27,7 +27,7 @@ function Restrictions() {
             console.log(data)
             var restrictions = []
             for (const value of data) {
-                restrictions.push({ name: value['name'], username: value['username'], restrictions: createAllowedArr(value['restriction']['_allowed_days'])})
+                restrictions.push({ name: value['_name'], username: value['_username'], restrictions: createAllowedArr(value['_restriction']['_allowed_days'])})
             }
             updateRestrictions(restrictions)
             console.log(empRestrictions)

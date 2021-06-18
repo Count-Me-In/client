@@ -63,12 +63,12 @@ function Bidding({ updatePercents }) {
 
         Axios.get(`${API_URL}/employees/bids_collection`).then(({ data: BidCollection }) => {
             if (BidCollection.length === 5) {
-                form.setFieldsValue({ 'bids': BidCollection.map((item) => item.percentage) })
+                form.setFieldsValue({ 'bids': BidCollection.map((item) => item._percentage) })
                 setoriginalBidsObj(BidCollection)
 
                 let sum = 0;//TODO: need this?
                 BidCollection.forEach((item) => {
-                    sum += item.percentage;
+                    sum += item._percentage;
                 })
                 updatePercents(sum)
             }

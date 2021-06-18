@@ -87,12 +87,12 @@ function HomePage({isManager, setIsManager}) {
                         id="employees"
                         size='small'
                         options={employees}
-                        getOptionLabel={(option) => option.name}
+                        getOptionLabel={(option) => option._name}
                         style={{ width: 300 }}
                         renderInput={(params) => <TextField {...params} label="Emplyee name" variant="outlined" />}
                         onChange={(event, value) => {
                             if (value) {
-                                getEmployeeScheduler(value.username)
+                                getEmployeeScheduler(value._username)
                             }
                             else {
                                 showEmployeeSched();

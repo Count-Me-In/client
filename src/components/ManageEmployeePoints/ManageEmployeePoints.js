@@ -17,7 +17,7 @@ function ManageEmployeePoints() {
         Promise.all([Axios.get(`${API_URL}/managers/getTotalPoints`), Axios.get(`${API_URL}/managers/getEmployeesPoints`)])
             .then(([totalPointsData, epmPointsData]) => {
                 setTotalPoints(totalPointsData.data);
-                const result = epmPointsData.data.map(value => ({ name: value['name'], username: value['username'], points: value['points'] }));
+                const result = epmPointsData.data.map(value => ({ name: value['_name'], username: value['_username'], points: value['_points'] }));
                 const sum = result.reduce((lastPoints, emp) => emp.points + lastPoints, 0)
                 updateEmpPoints(result)
                 setPointsLeft(totalPointsData.data - sum)
