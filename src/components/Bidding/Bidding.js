@@ -93,7 +93,7 @@ function Bidding({ updatePercents }) {
         //first - update original bids object
         const new_origin = originalBidsObj.map((item) => ({
             ...item,
-            percentage: bids[item.day -1]
+            _percentage: bids[item._day -1]
         }))
 
         Axios.put(`${API_URL}/employees/updateBids`, new_origin, {})
@@ -164,7 +164,7 @@ function Bidding({ updatePercents }) {
                                 }}
                             >
                                 {employees.map((emp, i) => (
-                                    <Option key={i} value={emp.username}>{emp.name}</Option>
+                                    <Option key={i} value={emp._username}>{emp._name}</Option>
                                 ))}
                             </Select>
                         </Form.Item>

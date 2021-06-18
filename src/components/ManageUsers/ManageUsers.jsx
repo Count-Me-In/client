@@ -24,9 +24,9 @@ const ManageUsers = () => {
 				setDataSource(employees.map((emp, i) => (
 					{
 						key: i,
-						username: emp.username,
-						name: emp.name,
-						manager: emp.manager
+						username: emp._username,
+						name: emp._name,
+						manager: emp._manager
 					}
 				)))
 				setCount(employees.length);
@@ -37,8 +37,8 @@ const ManageUsers = () => {
 			.then(({ data: employees }) => {
 				setManagerOptions(employees.map((emp, i) => (
 					{
-						value: emp.username,
-						label: emp.name
+						value: emp._username,
+						label: emp._name
 					}
 				)))
 			})
@@ -46,13 +46,10 @@ const ManageUsers = () => {
 	}, [])
 
 	const handleDelete = (key) => {
+		debugger
 		const rowToDelete = dataSource.find((item) => item.key == key);
 		if (!rowToDelete.isNew) {
-			Axios.delete(`${API_URL}/admin/deleteEmployee`, {}, {
-				params: {
-					username: rowToDelete.username
-				}
-			})
+			Axios.delete(`${API_URL}/admin/deleteEmployee/${rowToDelete.username}`, {}, {})
 		}
 
 		const newData = [...dataSource];
